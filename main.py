@@ -18,7 +18,7 @@ st.title("🛡️ Guía Operativa Policial")
 
 # 3. CONEXIÓN A TU GOOGLE SHEETS
 # Sustituye lo que hay entre comillas por tu enlace .csv de Google Sheets
-url_gsheets = https://docs.google.com/spreadsheets/d/e/2PACX-1vSayq81IwpszZ9-bjhssGEKBv8C-GUPA1HTyn8UE98M1elo9Xqmw71vwdpxCWdsx8V7V9OOgYDrT5Yv/pub?output=csv
+url_gsheets = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSayq81IwpszZ9-bjhssGEKBv8C-GUPA1HTyn8UE98M1elo9Xqmw71vwdpxCWdsx8V7V9OOgYDrT5Yv/pub?output=csv"
 
 try:
     # Cargamos los datos
