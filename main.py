@@ -12,6 +12,13 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .stDeployButton {display:none;}
+    .stButton>button {
+    width: 100%;
+    border-radius: 10px;
+    height: 3em;
+    background-color: #004488;
+    color: white;
+}
     </style>
     """, unsafe_allow_html=True)
 
