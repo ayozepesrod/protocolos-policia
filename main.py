@@ -1,4 +1,12 @@
 import streamlit as st
+# Esto oculta el menú de arriba y el botón de "Made with Streamlit"
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+    """, unsafe_content_code=True)
 import pandas as pd
 
 # Configuración visual
