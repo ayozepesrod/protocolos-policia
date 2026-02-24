@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
+import unicodedata
 
-# 1. CONFIGURACIÓN DE LA PÁGINA (Esto debe ir SIEMPRE primero)
-st.set_page_config(page_title="Protocolos Policiales", layout="centered")
+# 1. CONFIGURACIÓN
+st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️")
 
-# 2. OCULTAR MENÚS Y ESTILOS (Corregido)
+# Ocultar menús innecesarios
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -14,36 +15,59 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🛡️ Guía Operativa Policial")
+# Función de limpieza de tildes y mayúsculas
+def limpiar(t):
+    if not t: return ""
+    return ''.join(c for c in unicodedata.normalize('NFD', str(t))
+                  if unicodedata.category(c) != 'Mn').lower()
 
-# 3. CONEXIÓN A TU GOOGLE SHEETS
-# Sustituye lo que hay entre comillas por tu enlace .csv de Google Sheets
-url_gsheets = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSayq81IwpszZ9-bjhssGEKBv8C-GUPA1HTyn8UE98M1elo9Xqmw71vwdpxCWdsx8V7V9OOgYDrT5Yv/pub?output=csv"
+# 2. CARGA DE DATOS (Pon aquí tu enlace CSV de Google Sheets)
+url_gsheets = "TU_ENLACE_AQUI_EL_QUE_TERMINA_EN_CSV"
+
+st.title("🛡️ Sistema de Consulta Operativa")
 
 try:
-    # Cargamos los datos
     df = pd.read_csv(url_gsheets)
-    
-    # 4. BUSCADOR
-    query = st.text_input("Escribe el hecho o palabras clave (ej: novel alcohol):").lower()
+    df.columns = df.columns.str.lower().str.strip()
+
+    # 3. BUSCADOR
+    query = st.text_input("Buscar por concepto (ej: alcohol penal):")
 
     if query:
-        palabras = query.split()
-        # Filtra si TODAS las palabras buscadas están en 'tema' o 'busqueda'
-        mask = df.apply(lambda r: all(p in (str(r['tema']) + str(r['busqueda'])).lower() for p in palabras), axis=1)
-        res = df[mask]
+        query_limpia = limpiar(query)
+        palabras_clave = query_limpia.split()
+
+        def filtro_inteligente(fila):
+            texto_fila = limpiar(str(fila['tema']) + " " + str(fila['busqueda']))
+            return all(p in texto_fila for p in palabras_clave)
+
+        res = df[df.apply(filtro_inteligente, axis=1)]
 
         if not res.empty:
+            st.caption(f"Encontrados {len(res)} protocolos:")
             for _, row in res.iterrows():
-                with st.expander(f"✅ {row['tema']}", expanded=True):
-                    st.subheader("📋 Protocolo")
-                    st.write(row['protocolo'])
-                    st.subheader("⚖️ Denuncia")
+                # Detección de casos penales para aviso visual
+                es_penal = "PENAL" in str(row['tema']).upper()
+                
+                with st.expander(f"{'🚨' if es_penal else '✅'} {str(row['tema']).upper()}", expanded=es_penal):
+                    if es_penal:
+                        st.error("⚠️ CASO PENAL: Recordar confeccionar boletín y añadir Diligencia de Paralización.")
+                    
+                    # Mostrar Protocolo
+                    st.markdown("#### 📋 Protocolo de Actuación")
+                    st.info(row['protocolo'])
+                    
+                    # Mostrar Denuncia
+                    st.markdown("#### ⚖️ Precepto y Sanción")
                     st.code(row['denuncia'], language=None)
-                    st.caption("Selecciona el texto superior para copiarlo")
+                    
+                    # Mostrar Diligencia Tipo (Si existe)
+                    if 'diligencia' in row and pd.notna(row['diligencia']):
+                        st.markdown("#### ✍️ Diligencia Tipo (Copiar para Atestado)")
+                        st.code(row['diligencia'], language=None)
+                        st.caption("Toca el cuadro de arriba para copiar el texto")
         else:
-            st.error("No se encontraron resultados para esa combinación.")
-            
+            st.warning("No hay resultados. Prueba con palabras sueltas.")
+
 except Exception as e:
-    st.error("Configuración pendiente: Por favor, conecta el enlace CSV de tu Google Sheets.")
-    # Esto es solo para que no de error feo si aún no has puesto el link
+    st.error(f"Error técnico: {e}")
