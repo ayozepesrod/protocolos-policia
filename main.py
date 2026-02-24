@@ -22,7 +22,7 @@ def limpiar(t):
                   if unicodedata.category(c) != 'Mn').lower()
 
 # 2. CARGA DE DATOS (Pon aquí tu enlace CSV de Google Sheets)
-url_gsheets = "TU_ENLACE_AQUI_EL_QUE_TERMINA_EN_CSV"
+url_gsheets = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSayq81IwpszZ9-bjhssGEKBv8C-GUPA1HTyn8UE98M1elo9Xqmw71vwdpxCWdsx8V7V9OOgYDrT5Yv/pubhtml"
 
 st.title("🛡️ Sistema de Consulta Operativa")
 
