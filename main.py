@@ -13,7 +13,7 @@ st.markdown("""
     header {visibility: hidden;}
     .stDeployButton {display:none;}
     .stButton>button {
-    width: 100%;
+    width: 200%;
     border-radius: 10px;
     height: 3em;
     background-color: #004488;
