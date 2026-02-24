@@ -38,7 +38,7 @@ def limpiar(t):
                   if unicodedata.category(c) != 'Mn').lower()
 
 # 2. CARGA DE DATOS (Pega aquí tu enlace de Google Sheets compartido como "Cualquier persona")
-url_input = "TU_ENLACE_DE_GOOGLE_SHEETS_AQUI"
+url_input = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 
 def obtener_enlace_excel(url):
     if "pubhtml" in url:
