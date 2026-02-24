@@ -6,6 +6,7 @@ import unicodedata
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="centered")
 
 # ESTILO CSS (Incluye el botón y la interfaz del móvil)
+# ESTILO CSS MEJORADO (Forzado de colores)
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -13,20 +14,29 @@ st.markdown("""
     header {visibility: hidden;}
     .stDeployButton {display:none;}
     
-    /* Estilo para el botón de buscar */
-    .stButton>button {
+    /* BOTÓN AZUL POLICIAL FORZADO */
+    div.stButton > button:first-child {
+        background-color: #004488 !important;
+        color: white !important;
         width: 100%;
         border-radius: 10px;
         height: 3.5em;
-        background-color: #004488;
-        color: white;
         font-weight: bold;
         border: none;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
     }
-    
-    /* Espaciado del buscador en móvil */
+
+    /* Color cuando pasas el ratón o pulsas en el móvil */
+    div.stButton > button:first-child:hover, div.stButton > button:first-child:active {
+        background-color: #002244 !important;
+        color: white !important;
+        border: none;
+    }
+
+    /* Ajuste de la caja de texto */
     .stTextInput>div>div>input {
         height: 3.5em;
+        border-radius: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
