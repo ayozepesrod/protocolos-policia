@@ -87,7 +87,7 @@ try:
             st.caption(f"Resultados encontrados: {len(res)}")
             for _, row in res.iterrows():
                 es_penal = "PENAL" in str(row['tema']).upper()
-                with st.expander(f"{'🚨' if es_penal else '✅'} {str(row['tema']).upper()}", expanded=es_penal):
+                with st.expander(f"{'🚨' if es_penal else '✅'} {str(row['tema']).upper()}", expanded=False):
                     if es_penal:
                         st.error("⚠️ CASO PENAL: Confeccionar boletín municipal y añadir Diligencia de Paralización.")
                     st.markdown("#### 📋 Protocolo de Actuación")
