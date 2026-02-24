@@ -48,8 +48,20 @@ try:
     df.columns = df.columns.str.lower().str.strip()
 
     # 3. BUSCADOR
-    query = st.text_input("Buscar por concepto (ej: alcohol penal):")
+    # 3. BUSCADOR CON BOTÓN FÍSICO
+    with st.form(key='buscador_form'):
+        col1, col2 = st.columns([0.8, 0.2]) # Dividimos la fila para que el botón esté al lado o debajo
+        
+        with col1:
+            query = st.text_input("Buscar concepto (ej: alcohol 0.60):", key="input_text")
+        
+        with col2:
+            # Añadimos un espacio para alinear el botón con el input en PC, 
+            # en móvil se verá uno sobre otro o ajustado
+            st.write(" ") 
+            submit_button = st.form_submit_button(label='🔍 BUSCAR')
 
+    # La lógica se ejecuta si se pulsa Enter O si se pulsa el botón
     if query:
         query_limpia = limpiar(query)
         palabras_clave = query_limpia.split()
