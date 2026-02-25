@@ -38,7 +38,7 @@ def obtener_enlace_excel(url):
         if match: return f"https://docs.google.com/spreadsheets/d/{match.group(1)}/export?format=xlsx"
     return url
 
-url_input = "TU_ENLACE_DE_GOOGLE_SHEETS_AQUI"
+url_input = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 
 st.title("🛡️ Sistema de Consulta Operativa")
 
