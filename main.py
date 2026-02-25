@@ -6,7 +6,7 @@ import re
 # CONFIGURACIÓN DE PÁGINA
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="centered")
 
-# ESTILO CSS MEJORADO
+# ESTILO CSS
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display:none !important;}
@@ -24,15 +24,6 @@ st.markdown("""
     }
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
     div[data-testid="stTextInput"] input { height: 3.5rem !important; border-radius: 12px !important; }
-    /* Estilo para resaltar la medida cautelar */
-    .medida-alerta {
-        padding: 10px;
-        border-radius: 10px;
-        background-color: #fff3cd;
-        border-left: 5px solid #ffc107;
-        color: #856404;
-        font-weight: bold;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -55,12 +46,12 @@ st.title("🛡️ Sistema de Consulta Operativa")
 
 try:
     enlace_final = obtener_enlace_excel(url_input)
-    # Cargar datos y forzar nombres de columnas a minúsculas
     df = pd.read_excel(enlace_final)
-    df.columns = df.columns.str.lower().str.strip()
+    # Estandarizar nombres de columnas: minúsculas, sin tildes, sin espacios
+    df.columns = [limpiar(col).replace(" ", "_") for col in df.columns]
 
     with st.form(key='buscador_policial'):
-        query = st.text_input("¿Qué hecho quieres consultar?", placeholder="ej: vmp seguro, alcohol, drogas...")
+        query = st.text_input("¿Qué hecho quieres consultar?", placeholder="ej: vmp seguro, alcohol...")
         st.form_submit_button(label='🔍 BUSCAR AHORA')
 
     if query:
@@ -68,7 +59,6 @@ try:
         palabras_clave = query_limpia.split()
 
         def filtro_inteligente(fila):
-            # Combina tema y busqueda para filtrar
             texto_fila = limpiar(str(fila.get('tema', '')) + " " + str(fila.get('busqueda', '')))
             return all(p in texto_fila for p in palabras_clave)
 
@@ -77,29 +67,36 @@ try:
         if not res.empty:
             st.caption(f"Resultados encontrados: {len(res)}")
             for _, row in res.iterrows():
-                # Detectar si el tema indica un caso penal
-                tema_texto = str(row.get('tema', 'SIN TÍTULO')).upper()
-                es_penal = "PENAL" in tema_texto
+                tema_val = str(row.get('tema', 'SIN TÍTULO')).upper()
+                es_penal = "PENAL" in tema_val
                 
-                with st.expander(f"{'🚨' if es_penal else '✅'} {tema_texto}", expanded=False):
+                with st.expander(f"{'🚨' if es_penal else '✅'} {tema_val}", expanded=False):
                     if es_penal:
-                        st.error("⚠️ CASO PENAL: Seguir protocolo de Atestado y paralizar sanción administrativa.")
+                        st.error("⚠️ CASO PENAL: Instruir Atestado y paralizar vía administrativa.")
                     
-                    # 1. PROTOCOLO
                     st.markdown("#### 📋 Protocolo de Actuación")
-                    st.info(row.get('protocolo', 'No definido'))
+                    st.info(row.get('protocolo', 'Información no disponible'))
                     
-                    # 2. DENUNCIA
                     st.markdown("#### ⚖️ Precepto y Sanción")
                     st.code(row.get('denuncia', 'No definido'), language=None)
                     
-                    # 3. MEDIDA CAUTELAR (Nueva columna)
+                    # Columna de Medida Cautelar
                     medida = row.get('medida_cautelar')
                     if pd.notna(medida) and str(medida).strip() != "":
                         st.markdown("#### 🚧 Medida Cautelar")
-                        if "INMOVILIZ" in str(medida).upper() or "RETIRADA" in str(medida).upper() or "DEPOSITO" in str(medida).upper():
+                        if any(x in str(medida).upper() for x in ["INMOVILIZ", "RETIRADA", "DEPOSITO"]):
                             st.warning(f"⚠️ {medida}")
                         else:
                             st.write(f"👉 {medida}")
                     
-                    #
+                    # Columna de Diligencia
+                    diligencia = row.get('diligencia')
+                    if pd.notna(diligencia) and str(diligencia).strip() != "":
+                        st.markdown("#### ✍️ Diligencia Tipo")
+                        st.code(diligencia, language=None)
+        else:
+            st.warning("No se han encontrado protocolos.")
+
+except Exception as e:
+    st.error(f"Error crítico en el sistema: {e}")
+    st.info("Revisa que el Excel tenga las columnas: tema, busqueda, protocolo, denuncia, medida_cautelar, diligencia")
