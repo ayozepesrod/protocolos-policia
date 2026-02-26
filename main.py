@@ -27,60 +27,78 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# FUNCIONES
 def limpiar(t):
-    if not t: return ""
+    if not t:
+        return ""
     return ''.join(c for c in unicodedata.normalize('NFD', str(t))
                   if unicodedata.category(c) != 'Mn').lower()
 
-def obtener_enlace_excel(url):
-    if "pubhtml" in url: return url.replace("pubhtml", "pub?output=xlsx")
-    elif "edit" in url:
-        match = re.search(r"/d/([a-zA-Z0-9-_]+)", url)
-        if match: return f"https://docs.google.com/spreadsheets/d/{match.group(1)}/export?format=xlsx"
+def obtener_enlace_csv(url):
+    match = re.search(r"/d/([a-zA-Z0-9-_]+)", url)
+    if match:
+        return f"https://docs.google.com/spreadsheets/d/{match.group(1)}/export?format=csv"
     return url
 
-# URL DE TU GOOGLE SHEETS
+# URL GOOGLE SHEETS
 url_input = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 
 st.title("🛡️ Sistema de Consulta Operativa")
 
 try:
-    enlace_final = obtener_enlace_excel(url_input)
-    df = pd.read_excel(enlace_final)
-    # Estandarizar nombres de columnas: minúsculas, sin tildes, sin espacios
+    enlace_final = obtener_enlace_csv(url_input)
+
+    @st.cache_data(ttl=300)
+    def cargar_datos(url):
+        return pd.read_csv(url)
+
+    df = cargar_datos(enlace_final)
+
+    # Normalizar columnas
     df.columns = [limpiar(col).replace(" ", "_") for col in df.columns]
 
+    # Validar columnas mínimas
+    columnas_necesarias = ['tema', 'busqueda', 'protocolo', 'denuncia']
+    for col in columnas_necesarias:
+        if col not in df.columns:
+            st.error(f"Falta la columna obligatoria: {col}")
+            st.stop()
+
+    # FORMULARIO
     with st.form(key='buscador_policial'):
         query = st.text_input("¿Qué hecho quieres consultar?", placeholder="ej: vmp seguro, alcohol...")
-        st.form_submit_button(label='🔍 BUSCAR AHORA')
+        buscar = st.form_submit_button(label='🔍 BUSCAR AHORA')
 
-    if query:
+    if buscar and query:
         query_limpia = limpiar(query)
         palabras_clave = query_limpia.split()
 
-        def filtro_inteligente(fila):
-            texto_fila = limpiar(str(fila.get('tema', '')) + " " + str(fila.get('busqueda', '')))
-            return all(p in texto_fila for p in palabras_clave)
+        def puntuacion(fila):
+            texto = limpiar(str(fila.get('tema', '')) + " " + str(fila.get('busqueda', '')))
+            return sum(p in texto for p in palabras_clave)
 
-        res = df[df.apply(filtro_inteligente, axis=1)]
+        df["score"] = df.apply(puntuacion, axis=1)
+        res = df[df["score"] > 0].sort_values(by="score", ascending=False)
 
         if not res.empty:
-            st.caption(f"Resultados encontrados: {len(res)}")
+            st.success(f"{len(res)} resultado(s) encontrados")
+
             for _, row in res.iterrows():
                 tema_val = str(row.get('tema', 'SIN TÍTULO')).upper()
-                es_penal = "PENAL" in tema_val
-                
+                es_penal = "penal" in limpiar(tema_val)
+
                 with st.expander(f"{'🚨' if es_penal else '✅'} {tema_val}", expanded=False):
+
                     if es_penal:
                         st.error("⚠️ CASO PENAL: Instruir Atestado y paralizar vía administrativa.")
-                    
+
                     st.markdown("#### 📋 Protocolo de Actuación")
                     st.info(row.get('protocolo', 'Información no disponible'))
-                    
+
                     st.markdown("#### ⚖️ Precepto y Sanción")
                     st.code(row.get('denuncia', 'No definido'), language=None)
-                    
-                    # Columna de Medida Cautelar
+
+                    # Medida cautelar
                     medida = row.get('medida_cautelar')
                     if pd.notna(medida) and str(medida).strip() != "":
                         st.markdown("#### 🚧 Medida Cautelar")
@@ -88,15 +106,16 @@ try:
                             st.warning(f"⚠️ {medida}")
                         else:
                             st.write(f"👉 {medida}")
-                    
-                    # Columna de Diligencia
+
+                    # Diligencia
                     diligencia = row.get('diligencia')
                     if pd.notna(diligencia) and str(diligencia).strip() != "":
                         st.markdown("#### ✍️ Diligencia Tipo")
                         st.code(diligencia, language=None)
+
         else:
             st.warning("No se han encontrado protocolos.")
 
 except Exception as e:
     st.error(f"Error crítico en el sistema: {e}")
-    st.info("Revisa que el Excel tenga las columnas: tema, busqueda, protocolo, denuncia, medida_cautelar, diligencia")
+    st.info("Verifica conexión con Google Sheets y estructura del archivo.")
