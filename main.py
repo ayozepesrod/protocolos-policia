@@ -138,8 +138,7 @@ try:
                         # BLOQUE 1: EL PROTOCOLO (PRIORIDAD)
                         st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
                         st.info(diligencias)
-                        # para el diagrama de flujo
-                        st.image("https://tu-repositorio.com/diagrama_protocolo.png", caption="Flujo Estándar de Intervención")
+                       
 
                         # BLOQUE 2: DATOS TÉCNICOS
                         col1, col2, col3, col4 = st.columns(4)
