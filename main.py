@@ -155,8 +155,10 @@ try:
                             st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
 
                         # BLOQUE 3: TEXTO PARA EL BOLETÍN
+                       # st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
+                        #st.success(denuncia)
                         st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
-                        st.success(denuncia)
+                        st.code(denuncia, language=None) # El bloque de código permite copiar fácilmente
 
                         if obs:
                             st.warning(f"**Observaciones:** {obs}")
