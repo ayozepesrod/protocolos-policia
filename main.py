@@ -6,17 +6,17 @@ import re
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS (Ajustado para subir el título al máximo)
+# 2. ESTILO CSS ACTUALIZADO
 st.markdown("""
     <style>
-    /* Ocultar elementos nativos de Streamlit */
+    /* Ocultar elementos nativos */
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
 
-    /* ESTO ES LO QUE SUBE EL CONTENIDO AL BORDE SUPERIOR */
+    /* Subir el contenido al borde superior */
     .block-container {
         padding-top: 0rem !important; 
         padding-bottom: 0rem !important;
-        margin-top: -30px; /* Ajuste fino adicional */
+        margin-top: -30px; 
     }
 
     /* Estilo del título */
@@ -28,12 +28,20 @@ st.markdown("""
         text-align: center;
     }
 
-    /* Estilo para el formulario y botones */
+    /* AJUSTE DEL BOTÓN "OJO" (VER CONTRASEÑA) */
+    /* Lo hacemos más pequeño y lo desplazamos un poco a la derecha */
+    button[aria-label="Show password"] {
+        transform: scale(0.7); /* Reduce el tamaño al 70% */
+        margin-right: -10px;    /* Lo pega más al borde derecho */
+        opacity: 0.7;          /* Lo hace un poco más sutil */
+    }
+
+    /* Estilo para el formulario */
     div[data-testid="stForm"] {
         margin-top: 10px;
     }
 
-    div[data-testid="stForm"] button {
+    div[data-testid="stForm"] button[kind="primaryFormSubmit"] {
         background-color: #004488 !important;
         color: white !important;
         border: none !important;
@@ -51,19 +59,18 @@ st.markdown("""
     /* Estilo de los inputs */
     div[data-testid="stTextInput"] input {
         height: 4rem !important;
-        background-color: #d3d3d3 !important;
+        background-color: #e0e0e0 !important; /* Gris un poco más suave */
         border-radius: 12px !important; 
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. TÍTULO (Ahora pegado arriba)
+# 3. TÍTULO
 st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
 
-# 4. FUNCIONES ORIGINALES
+# 4. FUNCIONES
 def limpiar(t):
-    if not t:
-        return ""
+    if not t: return ""
     return ''.join(c for c in unicodedata.normalize('NFD', str(t))
                   if unicodedata.category(c) != 'Mn').lower()
 
@@ -73,11 +80,11 @@ def obtener_enlace_csv(url):
         return f"https://docs.google.com/spreadsheets/d/{match.group(1)}/export?format=csv"
     return url
 
-# 5. URL GOOGLE SHEETS
+# 5. URLS
 url_protocolos = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 url_usuarios = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 
-# 6. LÓGICA DE DATOS Y LOGIN
+# 6. LÓGICA
 try:
     enlace_final = obtener_enlace_csv(url_protocolos)
 
@@ -92,22 +99,20 @@ try:
     df = cargar_datos(enlace_final)
     usuarios_df = cargar_usuarios(url_usuarios)
 
-    # Formulario de Inicio de Sesión
+    # Formulario
     with st.form(key='login_form'):
         nombre = st.text_input("Nombre")
         contrasena = st.text_input("Contraseña", type="password")
         login_button = st.form_submit_button(label='Iniciar Sesión')
 
     if login_button:
-        # Verificación de usuario
-        usuario = usuarios_df[(usuarios_df['nombre'].astype(str) == nombre) & (usuarios_df['contraseña'].astype(str) == contrasena)]
+        usuario = usuarios_df[(usuarios_df['nombre'].astype(str) == nombre) & 
+                             (usuarios_df['contraseña'].astype(str) == contrasena)]
         
         if not usuario.empty:
             st.success("Inicio de sesión exitoso")
-            # Aquí puedes añadir el resto de tu lógica de protocolos
         else:
             st.error("Credenciales incorrectas")
 
 except Exception as e:
-    st.error(f"Error crítico en el sistema: {e}")
-    st.info("Verifica la conexión con Google Sheets y la estructura del archivo.")
+    st.error(f"Error crítico: {e}")
