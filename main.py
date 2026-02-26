@@ -10,6 +10,12 @@ st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", l
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display:none !important;}
+
+    /* Ajuste del margen superior para el título */
+    h1 {
+        margin-top: 20px; /* Ajusta este valor según lo necesario */
+    }
+
     div[data-testid="stForm"] button {
         background-color: #004488 !important;
         color: white !important;
