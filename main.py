@@ -41,8 +41,8 @@ def obtener_enlace_csv(url):
     return url
 
 # URL GOOGLE SHEETS
-url_input = "tu_enlace_google_sheets_protocolos"
-url_usuarios = "tu_enlace_google_sheets_usuarios"
+url_input = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
+url_usuarios = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 
 st.title("🛡️ Sistema de Consulta Operativa")
 
