@@ -14,21 +14,22 @@ st.markdown("""
     /* Eliminar márgenes de toda la página */
     body {
         margin: 0; /* Elimina márgenes del body */
+        padding: 0; /* Elimina padding del body */
     }
 
     /* Ajuste del título */
     .titulo {
         margin: 0; /* Elimina los márgenes del título */
-        padding: 10px 0; /* Puedes ajustar este padding */
+        padding: 0; /* Asegura que no hay padding alrededor */
         font-size: 2.5rem; /* Tamaño del texto */
         color: #004488; /* Color del texto */
         text-align: center; /* Centrando el texto */
         position: relative; /* Permite ajustar la posición */
+        top: -20px; /* Mueve el título hacia arriba */
     }
 
-    /* Espacio arriba para el título */
-    .espacio {
-        height: 20px; /* Ajusta este valor para mover el título */
+    div[data-testid="stForm"] {
+        margin-top: 10px; /* Ajustes de top a los formularios */
     }
 
     div[data-testid="stForm"] button {
@@ -55,11 +56,9 @@ st.markdown("""
         background-color: #d3d3d3 !important; /* Color gris claro */
         border-radius: 12px !important; 
     }
+
     </style>
 """, unsafe_allow_html=True)
-
-# ESPACIO ARRIBA
-st.markdown('<div class="espacio"></div>', unsafe_allow_html=True)
 
 # TÍTULO PERSONALIZADO
 st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
@@ -113,4 +112,4 @@ try:
 
 except Exception as e:
     st.error(f"Error crítico en el sistema: {e}")
-    st.info("Verifica conexión con Google Sheets y estructura del archivo.")
+    st.info("Ver verifica conexión con Google Sheets y estructura del archivo.")
