@@ -11,13 +11,19 @@ st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
 
+    body {
+        margin: 0; /* Elimina márgenes del body */
+    }
+
     /* Ajuste del título */
     h1 {
         margin: 0; /* Elimina el margen por defecto */
-        padding: 10px 0; /* Ajusta el padding */
+        padding: 5px 0; /* Ajusta el padding acorde a tus necesidades */
         font-size: 2.5rem; /* Tamaño del texto */
         color: #004488; /* Color del texto */
         text-align: center; /* Centrando el texto */
+        position: relative; /* Permite ajustar posición */
+        top: -10px; /* Mueve el título hacia arriba */
     }
 
     div[data-testid="stForm"] button {
