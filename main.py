@@ -24,6 +24,15 @@ st.markdown("""
     }
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
     div[data-testid="stTextInput"] input { height: 3.5rem !important; border-radius: 12px !important; }
+    
+    /* Ocultar el botón 'Ver Contraseña' */
+    div[data-testid="stTextInput"] div [class*="stButton"] {
+        display: none; /* Oculta el botón "Ver" */
+    }
+
+    div[data-testid="stTextInput"] {
+        margin-top: 10px; /* Espaciado superior más limpio */
+    }
     </style>
     """, unsafe_allow_html=True)
 
