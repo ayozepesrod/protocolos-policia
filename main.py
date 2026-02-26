@@ -6,7 +6,7 @@ import re
 # 1. CONFIGURACIÓN
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS ACTUALIZADO
+# 2. ESTILO CSS
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
@@ -15,10 +15,11 @@ st.markdown("""
     .seccion-header {
         color: #004488;
         font-weight: bold;
-        border-bottom: 1px solid #ddd;
-        margin-top: 10px;
-        margin-bottom: 5px;
-        font-size: 1.1rem;
+        border-bottom: 2px solid #004488;
+        margin-top: 15px;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        text-transform: uppercase;
     }
     .dato-importante {
         background-color: #e8f0f7;
@@ -114,7 +115,7 @@ try:
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
                 for _, row in resultado.iterrows():
-                    # --- EXTRACCIÓN DE TODOS LOS DATOS (PDF + EXCEL) ---
+                    # Extracción de datos
                     titulo = row.get('titulo', 'Protocolo sin título')
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', row.get('articulo', '---'))
@@ -129,12 +130,16 @@ try:
                     p_clave = row.get('palabras_clave', '')
                     obs = row.get('observaciones', '')
 
-                    # --- DISEÑO DE LA FICHA ---
+                    # --- DISEÑO DE LA FICHA (ORDEN OPERATIVO) ---
                     with st.expander(f"⚖️ {titulo} | {norma} Art. {art}"):
                         if p_clave:
-                            st.markdown(f"<span class='tag-container'>🔑 {p_clave}</span>", unsafe_allow_html=True)
+                            st.caption(f"🔑 Palabras clave: {p_clave}")
                         
-                        # Fila 1: Datos técnicos del PDF
+                        # BLOQUE 1: EL PROTOCOLO (PRIORIDAD)
+                        st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
+                        st.info(diligencias)
+
+                        # BLOQUE 2: DATOS TÉCNICOS
                         col1, col2, col3, col4 = st.columns(4)
                         with col1:
                             st.markdown("<div class='seccion-header'>📌 Código</div>", unsafe_allow_html=True)
@@ -149,12 +154,9 @@ try:
                             st.markdown("<div class='seccion-header'>💰 Multa</div>", unsafe_allow_html=True)
                             st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
 
-                        # Fila 2: Textos largos
-                        st.markdown("<div class='seccion-header'>📝 Texto Íntegro de la Denuncia</div>", unsafe_allow_html=True)
-                        st.info(denuncia)
-
-                        st.markdown("<div class='seccion-header'>📋 Diligencias y Procedimiento</div>", unsafe_allow_html=True)
-                        st.write(diligencias)
+                        # BLOQUE 3: TEXTO PARA EL BOLETÍN
+                        st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
+                        st.success(denuncia)
 
                         if obs:
                             st.warning(f"**Observaciones:** {obs}")
@@ -162,7 +164,7 @@ try:
             else:
                 st.warning(f"No hay resultados para: {busqueda}")
         else:
-            st.info("Introduce un término para consultar el protocolo.")
+            st.info("Utilice el buscador superior para localizar el protocolo.")
 
 except Exception as e:
     st.error(f"Error en el sistema: {e}")
