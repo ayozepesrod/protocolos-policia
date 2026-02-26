@@ -23,16 +23,18 @@ st.markdown("""
         cursor: pointer !important;
     }
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
-    div[data-testid="stTextInput"] input { height: 3.5rem !important; border-radius: 12px !important; }
-
+    div[data-testid="stTextInput"] input {
+        height: 3.5rem !important; 
+        border-radius: 12px !important; 
+    }
+    
     /* Mejora del botón 'Ver Contraseña' */
     div[data-testid="stTextInput"] div {
-        display: inline-block; /* Cambiar a bloque en línea */
-        color: #0066CC; /* Color del texto */
+        display: inline; /* Cambiar para alinearse mejor */
+        color: #888; /* Color neutro */
         cursor: pointer; /* Cambiar cursor al pasar */
         margin-left: -30px; /* Ajustar margen para que esté cerca del campo */
-        margin-top: 0; /* Margin superior a cero */
-        padding: 0; /* Sin espaciado */
+        font-size: 1rem; /* Tamaño de fuente más pequeño */
     }
     
     /* Efecto hover */
@@ -41,6 +43,7 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 
