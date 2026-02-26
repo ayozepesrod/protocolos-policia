@@ -6,7 +6,7 @@ import re
 # 1. CONFIGURACIÓN
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS
+# 2. ESTILO CSS ACTUALIZADO
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
@@ -26,6 +26,16 @@ st.markdown("""
         border-radius: 5px;
         font-weight: bold;
         color: #d32f2f;
+        display: inline-block;
+        margin-top: 5px;
+    }
+    .tag-container {
+        background-color: #f0f2f6;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        color: #555;
+        border: 1px solid #ccc;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -70,7 +80,6 @@ try:
             st.subheader("Acceso de Usuario")
             nombre_input = st.text_input("Nombre de Usuario")
             contrasena_input = st.text_input("Contraseña", type="password")
-            
             if st.form_submit_button(label='ENTRAR'):
                 user = usuarios_df[
                     (usuarios_df['nombre'].astype(str).str.lower() == nombre_input.lower().strip()) & 
@@ -91,7 +100,7 @@ try:
             st.session_state['autenticado'] = False
             st.rerun()
 
-        busqueda = st.text_input("🔍 Buscar por infracción, artículo o palabra clave...")
+        busqueda = st.text_input("🔍 Buscar por infracción, artículo, puntos o palabra clave...")
 
         if busqueda:
             termino = limpiar_texto(busqueda)
@@ -105,39 +114,55 @@ try:
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
                 for _, row in resultado.iterrows():
-                    titulo = row.get('titulo', 'Sin Título')
-                    norma = row.get('norma', 'SOA')
-                    articulo = row.get('art', row.get('articulo', 'N/A'))
-                    opc = row.get('opc', '')
-                    cuantia = row.get('multa', row.get('cuantia', 'N/A'))
-                    hechos = row.get('texto_denuncia_integro', row.get('hechos', 'No descritos'))
+                    # --- EXTRACCIÓN DE TODOS LOS DATOS (PDF + EXCEL) ---
+                    titulo = row.get('titulo', 'Protocolo sin título')
+                    norma = row.get('norma', 'LSV')
+                    art = row.get('art', row.get('articulo', '---'))
+                    apt = row.get('apt', '-')
+                    opc = row.get('opc', '-')
+                    ptos = row.get('ptos', '0')
+                    calif = row.get('calif', 'Grave')
+                    multa = row.get('multa', row.get('cuantia', '0'))
+                    imp_rd = row.get('imp_rd', '0')
+                    denuncia = row.get('texto_denuncia_integro', row.get('hechos', 'No disponible'))
                     diligencias = row.get('diligencias', 'No especificadas')
                     p_clave = row.get('palabras_clave', '')
+                    obs = row.get('observaciones', '')
 
-                    with st.expander(f"⚖️ {titulo} - {norma} Art. {articulo}"):
+                    # --- DISEÑO DE LA FICHA ---
+                    with st.expander(f"⚖️ {titulo} | {norma} Art. {art}"):
                         if p_clave:
-                            st.caption(f"🔑 Palabras clave: {p_clave}")
+                            st.markdown(f"<span class='tag-container'>🔑 {p_clave}</span>", unsafe_allow_html=True)
                         
-                        col_a, col_b = st.columns(2)
-                        with col_a:
-                            st.markdown("<div class='seccion-header'>📌 Norma / Art / Opción</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{norma} {articulo} / {opc}</span>", unsafe_allow_html=True)
-                        with col_b:
-                            st.markdown("<div class='seccion-header'>💰 Sanción</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{cuantia} €</span>", unsafe_allow_html=True)
+                        # Fila 1: Datos técnicos del PDF
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.markdown("<div class='seccion-header'>📌 Código</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{norma} {art} {apt} / {opc}</span>", unsafe_allow_html=True)
+                        with col2:
+                            st.markdown("<div class='seccion-header'>⭐ Puntos</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{ptos} ptos</span>", unsafe_allow_html=True)
+                        with col3:
+                            st.markdown("<div class='seccion-header'>⚠️ Calif.</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{calif}</span>", unsafe_allow_html=True)
+                        with col4:
+                            st.markdown("<div class='seccion-header'>💰 Multa</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
 
-                        st.markdown("<div class='seccion-header'>📝 Texto Íntegro de Denuncia</div>", unsafe_allow_html=True)
-                        st.info(hechos)
+                        # Fila 2: Textos largos
+                        st.markdown("<div class='seccion-header'>📝 Texto Íntegro de la Denuncia</div>", unsafe_allow_html=True)
+                        st.info(denuncia)
 
-                        st.markdown("<div class='seccion-header'>📋 Diligencias Policiales</div>", unsafe_allow_html=True)
+                        st.markdown("<div class='seccion-header'>📋 Diligencias y Procedimiento</div>", unsafe_allow_html=True)
                         st.write(diligencias)
 
-                        if 'observaciones' in row and row['observaciones']:
-                            st.warning(f"**Nota:** {row['observaciones']}")
+                        if obs:
+                            st.warning(f"**Observaciones:** {obs}")
+
             else:
-                st.warning(f"No se han encontrado resultados para '{busqueda.strip()}'.")
+                st.warning(f"No hay resultados para: {busqueda}")
         else:
-            st.info("Utilice el buscador para localizar protocolos específicos.")
+            st.info("Introduce un término para consultar el protocolo.")
 
 except Exception as e:
-    st.error(f"Error crítico en el sistema: {e}")
+    st.error(f"Error en el sistema: {e}")
