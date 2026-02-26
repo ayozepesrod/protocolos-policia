@@ -69,7 +69,6 @@ try:
         with st.form(key='login_form'):
             st.subheader("Acceso de Usuario")
             nombre_input = st.text_input("Nombre de Usuario")
-            # AQUÍ ESTABA EL ERROR (Línea 72)
             contrasena_input = st.text_input("Contraseña", type="password")
             
             if st.form_submit_button(label='ENTRAR'):
@@ -104,4 +103,41 @@ try:
             resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
 
             if not resultado.empty:
-                st.write(f
+                st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
+                for _, row in resultado.iterrows():
+                    titulo = row.get('titulo', 'Sin Título')
+                    norma = row.get('norma', 'SOA')
+                    articulo = row.get('art', row.get('articulo', 'N/A'))
+                    opc = row.get('opc', '')
+                    cuantia = row.get('multa', row.get('cuantia', 'N/A'))
+                    hechos = row.get('texto_denuncia_integro', row.get('hechos', 'No descritos'))
+                    diligencias = row.get('diligencias', 'No especificadas')
+                    p_clave = row.get('palabras_clave', '')
+
+                    with st.expander(f"⚖️ {titulo} - {norma} Art. {articulo}"):
+                        if p_clave:
+                            st.caption(f"🔑 Palabras clave: {p_clave}")
+                        
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.markdown("<div class='seccion-header'>📌 Norma / Art / Opción</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{norma} {articulo} / {opc}</span>", unsafe_allow_html=True)
+                        with col_b:
+                            st.markdown("<div class='seccion-header'>💰 Sanción</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{cuantia} €</span>", unsafe_allow_html=True)
+
+                        st.markdown("<div class='seccion-header'>📝 Texto Íntegro de Denuncia</div>", unsafe_allow_html=True)
+                        st.info(hechos)
+
+                        st.markdown("<div class='seccion-header'>📋 Diligencias Policiales</div>", unsafe_allow_html=True)
+                        st.write(diligencias)
+
+                        if 'observaciones' in row and row['observaciones']:
+                            st.warning(f"**Nota:** {row['observaciones']}")
+            else:
+                st.warning(f"No se han encontrado resultados para '{busqueda.strip()}'.")
+        else:
+            st.info("Utilice el buscador para localizar protocolos específicos.")
+
+except Exception as e:
+    st.error(f"Error crítico en el sistema: {e}")
