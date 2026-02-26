@@ -103,9 +103,10 @@ try:
             # Aquí limpiamos el término buscado de espacios extras
             termino = limpiar_texto(busqueda)
             
-            # Filtramos comparando el término limpio contra la fila convertida a texto
+           # Reemplazar tu lógica de búsqueda por esta más flexible:
+            palabras_buscadas = termino.split()
             resultado = protocolos_df[
-                protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)
+                protocolos_df.apply(lambda row: all(p in limpiar_texto(' '.join(row.map(str))) for p in palabras_buscadas), axis=1)
             ]
 
             if not resultado.empty:
