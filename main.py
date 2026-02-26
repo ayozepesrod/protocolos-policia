@@ -28,7 +28,6 @@ st.markdown("""
         font-weight: bold;
         color: #d32f2f;
     }
-    /* Estilo para el icono del ojo en el input de contraseña */
     button[aria-label="Show password"] {
         transform: scale(0.7);
         margin-right: -10px;
@@ -42,7 +41,8 @@ st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", uns
 # 3. FUNCIONES
 def limpiar_texto(t):
     if not t: return ""
-    return ''.join(c for c in unicodedata.normalize('NFD', str(t))
+    # El .strip() aquí elimina los espacios sobrantes que escribas en el buscador
+    return ''.join(c for c in unicodedata.normalize('NFD', str(t).strip())
                   if unicodedata.category(c) != 'Mn').lower()
 
 def obtener_enlace_csv(url, gid="0"):
@@ -61,7 +61,6 @@ try:
     @st.cache_data(ttl=300)
     def cargar_datos(url, gid):
         enlace = obtener_enlace_csv(url, gid)
-        # Cargamos y forzamos que todo sea tratado como texto inicialmente para evitar el error float
         df = pd.read_csv(enlace).fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
@@ -79,7 +78,6 @@ try:
             nombre_input = st.text_input("Nombre de Usuario")
             contrasena_input = st.text_input("Contraseña", type="password")
             if st.form_submit_button(label='ENTRAR'):
-                # Busqueda de usuario ignorando mayúsculas/minúsculas
                 user = usuarios_df[
                     (usuarios_df['nombre'].astype(str).str.lower() == nombre_input.lower().strip()) & 
                     (usuarios_df['contraseña'].astype(str) == contrasena_input.strip())
@@ -102,8 +100,10 @@ try:
         busqueda = st.text_input("🔍 Buscar por infracción, artículo o palabra clave...")
 
         if busqueda:
+            # Aquí limpiamos el término buscado de espacios extras
             termino = limpiar_texto(busqueda)
-            # EXPLICACIÓN DEL FIX: row.map(str) asegura que CADA celda sea texto antes de unir la fila para buscar
+            
+            # Filtramos comparando el término limpio contra la fila convertida a texto
             resultado = protocolos_df[
                 protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)
             ]
@@ -135,7 +135,7 @@ try:
                         if 'observaciones' in row and row['observaciones']:
                             st.warning(f"**Nota:** {row['observaciones']}")
             else:
-                st.warning("No se han encontrado resultados.")
+                st.warning(f"No se han encontrado resultados para '{busqueda.strip()}'.")
         else:
             st.info("Utilice el buscador para localizar protocolos específicos.")
 
