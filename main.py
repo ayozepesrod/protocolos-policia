@@ -6,13 +6,29 @@ import re
 # 1. CONFIGURACIÓN
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS
+# 2. ESTILO CSS MEJORADO
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
     .block-container { padding-top: 0rem !important; margin-top: -30px; }
-    .titulo { margin: 0; padding: 10px 0; font-size: 2.5rem; color: #004488; text-align: center; }
-    button[aria-label="Show password"] { transform: scale(0.7); margin-right: -10px; opacity: 0.6; }
+    .titulo { margin: 0; padding: 10px 0; font-size: 2.5rem; color: #004488; text-align: center; font-weight: bold; }
+    
+    /* Estilo de las secciones dentro del protocolo */
+    .seccion-header {
+        color: #004488;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+    }
+    .dato-importante {
+        background-color: #e8f0f7;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #d32f2f; /* Rojo para cuantías/artículos */
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -21,7 +37,6 @@ st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", uns
 # 3. FUNCIONES
 def limpiar_texto(t):
     if not t: return ""
-    # Convertimos a string por seguridad y limpiamos tildes
     return ''.join(c for c in unicodedata.normalize('NFD', str(t))
                   if unicodedata.category(c) != 'Mn').lower()
 
@@ -32,19 +47,16 @@ def obtener_enlace_csv(url, gid="0"):
         return f"https://docs.google.com/spreadsheets/d/{doc_id}/export?format=csv&gid={gid}"
     return url
 
-# --- CONFIGURACIÓN DE HOJAS ---
+# --- 4. CARGA DE DATOS ---
 URL_DOCUMENTO = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit"
 GID_PROTOCOLOS = "0"
 GID_USUARIOS = "142130076" 
 
-# 4. CARGA DE DATOS
 try:
     @st.cache_data(ttl=300)
     def cargar_datos(url, gid):
         enlace = obtener_enlace_csv(url, gid)
-        df = pd.read_csv(enlace)
-        # Reemplazar valores nulos (NaN) por texto vacío para evitar errores de búsqueda
-        df = df.fillna("")
+        df = pd.read_csv(enlace).fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
 
@@ -54,66 +66,66 @@ try:
     if 'autenticado' not in st.session_state:
         st.session_state['autenticado'] = False
 
-    # --- 5. LÓGICA DE LOGIN ---
+    # --- 5. LOGIN ---
     if not st.session_state['autenticado']:
         with st.form(key='login_form'):
             st.subheader("Acceso de Usuario")
             nombre_input = st.text_input("Nombre de Usuario")
             contrasena_input = st.text_input("Contraseña", type="password")
-            login_button = st.form_submit_button(label='ENTRAR')
+            if st.form_submit_button(label='ENTRAR'):
+                user = usuarios_df[(usuarios_df['nombre'].astype(str).str.lower() == nombre_input.lower().strip()) & 
+                                   (usuarios_df['contraseña'].astype(str) == contrasena_input.strip())]
+                if not user.empty:
+                    st.session_state['autenticado'] = True
+                    st.session_state['usuario_nombre'] = user.iloc[0]['nombre']
+                    st.rerun()
+                else: st.error("Credenciales incorrectas")
 
-        if login_button:
-            usuario_encontrado = usuarios_df[
-                (usuarios_df['nombre'].astype(str).str.strip().str.lower() == nombre_input.strip().lower()) & 
-                (usuarios_df['contraseña'].astype(str).str.strip() == str(contrasena_input).strip())
-            ]
-            
-            if not usuario_encontrado.empty:
-                st.session_state['autenticado'] = True
-                st.session_state['usuario_nombre'] = usuario_encontrado.iloc[0]['nombre']
-                st.rerun()
-            else:
-                st.error("Usuario o contraseña incorrectos")
-
-    # --- 6. PANTALLA PRINCIPAL (LOGUEADO) ---
+    # --- 6. BUSCADOR Y RESULTADOS ---
     else:
-        col_user, col_logout = st.columns([0.8, 0.2])
-        col_user.success(f"Bienvenido/a, {st.session_state['usuario_nombre']}")
-        if col_logout.button("Cerrar Sesión"):
+        c1, c2 = st.columns([0.8, 0.2])
+        c1.write(f"👤 Agente: **{st.session_state['usuario_nombre']}**")
+        if c2.button("Cerrar Sesión"):
             st.session_state['autenticado'] = False
             st.rerun()
 
-        # BUSCADOR
-        busqueda = st.text_input("🔍 Buscar protocolo, palabra clave o código...")
+        busqueda = st.text_input("🔍 Buscar por infracción, artículo o palabra clave...")
 
         if busqueda:
             termino = limpiar_texto(busqueda)
-            
-            # FILTRO CORREGIDO: Convertimos explícitamente cada celda a string antes de unir
-            resultado = protocolos_df[
-                protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)
-            ]
+            resultado = protocolos_df[protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)]
 
             if not resultado.empty:
-                st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
-                
-                for i, row in resultado.iterrows():
+                for _, row in resultado.iterrows():
+                    # Usamos .get() para leer las columnas del Excel
                     titulo = row.get('titulo', 'Sin Título')
-                    contenido = row.get('contenido', row.get('descripcion', 'Sin contenido disponible'))
-                    
-                    with st.expander(f"🔹 {titulo}"):
-                        st.markdown(f"""
-                            <div style='padding: 10px; border-radius: 5px; border-left: 3px solid #004488; background-color: #f9f9f9; color: #333;'>
-                                {contenido}
-                            </div>
-                        """, unsafe_allow_html=True)
-                        
-                        if 'enlace' in row and row['enlace'] != "":
-                            st.link_button("🔗 Ver documento completo", row['enlace'])
+                    articulo = row.get('articulo', row.get('codigo', 'N/A'))
+                    cuantia = row.get('cuantia', row.get('multa', 'N/A'))
+                    hechos = row.get('hechos', 'No descritos')
+                    diligencias = row.get('diligencias', 'No especificadas')
+
+                    # DESPLEGABLE CON DISEÑO DE FICHA
+                    with st.expander(f"⚖️ {titulo} - Art. {articulo}"):
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.markdown(f"<div class='seccion-header'>📌 Artículo / Código</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{articulo}</span>", unsafe_allow_html=True)
+                        with col_b:
+                            st.markdown(f"<div class='seccion-header'>💰 Cuantía / Sanción</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{cuantia}</span>", unsafe_allow_html=True)
+
+                        st.markdown(f"<div class='seccion-header'>📝 Hechos Concurrentes</div>", unsafe_allow_html=True)
+                        st.write(hechos)
+
+                        st.markdown(f"<div class='seccion-header'>📋 Diligencias a realizar</div>", unsafe_allow_html=True)
+                        st.info(diligencias)
+
+                        if 'observaciones' in row and row['observaciones']:
+                            st.warning(f"**Nota:** {row['observaciones']}")
             else:
-                st.warning("⚠️ No se encontraron protocolos con ese criterio.")
+                st.warning("No se han encontrado resultados.")
         else:
-            st.info("Escriba en el buscador para consultar la guía operativa.")
+            st.info("Utilice el buscador para localizar protocolos específicos.")
 
 except Exception as e:
-    st.error(f"Error general: {e}")
+    st.error(f"Error: {e}")
