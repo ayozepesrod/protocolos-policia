@@ -12,7 +12,6 @@ st.markdown("""
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
     .block-container { padding-top: 0rem !important; margin-top: -30px; }
     .titulo { margin: 0; padding: 10px 0; font-size: 2.5rem; color: #004488; text-align: center; font-weight: bold; }
-    
     .seccion-header {
         color: #004488;
         font-weight: bold;
@@ -28,11 +27,6 @@ st.markdown("""
         font-weight: bold;
         color: #d32f2f;
     }
-    button[aria-label="Show password"] {
-        transform: scale(0.7);
-        margin-right: -10px;
-        opacity: 0.6;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -41,7 +35,6 @@ st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", uns
 # 3. FUNCIONES
 def limpiar_texto(t):
     if not t: return ""
-    # El .strip() aquí elimina los espacios sobrantes que escribas en el buscador
     return ''.join(c for c in unicodedata.normalize('NFD', str(t).strip())
                   if unicodedata.category(c) != 'Mn').lower()
 
@@ -99,48 +92,17 @@ try:
 
         busqueda = st.text_input("🔍 Buscar por infracción, artículo o palabra clave...")
 
-       # --- BUSCADOR MEJORADO ---
-    if busqueda:
-    termino = limpiar_texto(busqueda)
-    
-    # Esto asegura que busque en TODAS las columnas, incluida 'palabras_clave'
-    def buscar_en_fila(row):
-        # Unimos el contenido de todas las celdas de la fila en un solo texto
-        texto_fila = limpiar_texto(' '.join(row.astype(str)))
-        return termino in texto_fila
+        if busqueda:
+            termino = limpiar_texto(busqueda)
+            
+            # Buscador que analiza todas las columnas (incluida palabras_clave)
+            def buscar_en_fila(row):
+                texto_fila = limpiar_texto(' '.join(row.astype(str)))
+                return termino in texto_fila
 
-        resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
+            resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
 
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
                 for _, row in resultado.iterrows():
-                    titulo = row.get('titulo', 'Sin Título')
-                    articulo = row.get('articulo', row.get('codigo', 'N/A'))
-                    cuantia = row.get('cuantia', row.get('multa', 'N/A'))
-                    hechos = row.get('hechos', 'No descritos')
-                    diligencias = row.get('diligencias', 'No especificadas')
-
-                    with st.expander(f"⚖️ {titulo} - Art. {articulo}"):
-                        col_a, col_b = st.columns(2)
-                        with col_a:
-                            st.markdown("<div class='seccion-header'>📌 Artículo / Código</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{articulo}</span>", unsafe_allow_html=True)
-                        with col_b:
-                            st.markdown("<div class='seccion-header'>💰 Cuantía / Sanción</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{cuantia}</span>", unsafe_allow_html=True)
-
-                        st.markdown("<div class='seccion-header'>📝 Hechos Concurrentes</div>", unsafe_allow_html=True)
-                        st.write(hechos)
-
-                        st.markdown("<div class='seccion-header'>📋 Diligencias a realizar</div>", unsafe_allow_html=True)
-                        st.info(diligencias)
-
-                        if 'observaciones' in row and row['observaciones']:
-                            st.warning(f"**Nota:** {row['observaciones']}")
-            else:
-                st.warning(f"No se han encontrado resultados para '{busqueda.strip()}'.")
-        else:
-            st.info("Utilice el buscador para localizar protocolos específicos.")
-
-except Exception as e:
-    st.error(f"Error detectado: {e}")
+                    # Usamos .get() para evitar errores si la columna no existe en el Excel
