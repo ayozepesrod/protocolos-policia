@@ -126,6 +126,7 @@ try:
                     multa = row.get('multa', row.get('cuantia', '0'))
                     imp_rd = row.get('imp_rd', '0')
                     denuncia = row.get('texto_denuncia_integro', row.get('hechos', 'No disponible'))
+                    notas=row.get('notas', row.get('notas', 'No disponible))
                     diligencias = row.get('diligencias', 'No especificadas')
                     p_clave = row.get('palabras_clave', '')
                     obs = row.get('observaciones', '')
