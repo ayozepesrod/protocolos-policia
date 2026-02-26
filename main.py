@@ -13,7 +13,7 @@ st.markdown("""
 
     /* Ajuste del margen superior para el título */
     h1 {
-        margin-top: 10px; /* Ajusta este valor según lo necesario */
+        margin-top: 100px; /* Ajusta este valor según lo necesario */
     }
 
     div[data-testid="stForm"] button {
