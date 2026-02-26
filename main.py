@@ -99,15 +99,17 @@ try:
 
         busqueda = st.text_input("🔍 Buscar por infracción, artículo o palabra clave...")
 
-        if busqueda:
-            # Aquí limpiamos el término buscado de espacios extras
-            termino = limpiar_texto(busqueda)
-            
-           # Reemplazar tu lógica de búsqueda por esta más flexible:
-            palabras_buscadas = termino.split()
-            resultado = protocolos_df[
-                protocolos_df.apply(lambda row: all(p in limpiar_texto(' '.join(row.map(str))) for p in palabras_buscadas), axis=1)
-            ]
+       # --- BUSCADOR MEJORADO ---
+    if busqueda:
+    termino = limpiar_texto(busqueda)
+    
+    # Esto asegura que busque en TODAS las columnas, incluida 'palabras_clave'
+    def buscar_en_fila(row):
+        # Unimos el contenido de todas las celdas de la fila en un solo texto
+        texto_fila = limpiar_texto(' '.join(row.astype(str)))
+        return termino in texto_fila
+
+        resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
 
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
