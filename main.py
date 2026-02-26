@@ -4,26 +4,31 @@ import unicodedata
 import re
 
 # CONFIGURACIÓN DE PÁGINA
-st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
 # ESTILO CSS
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
 
+    /* Eliminar márgenes de toda la página */
     body {
         margin: 0; /* Elimina márgenes del body */
     }
 
     /* Ajuste del título */
-    h1 {
-        margin: 0; /* Elimina el margen por defecto */
-        padding: 5px 0; /* Ajusta el padding acorde a tus necesidades */
+    .titulo {
+        margin: 0; /* Elimina los márgenes del título */
+        padding: 10px 0; /* Puedes ajustar este padding */
         font-size: 2.5rem; /* Tamaño del texto */
         color: #004488; /* Color del texto */
         text-align: center; /* Centrando el texto */
-        position: relative; /* Permite ajustar posición */
-        top: -10px; /* Mueve el título hacia arriba */
+        position: relative; /* Permite ajustar la posición */
+    }
+
+    /* Espacio arriba para el título */
+    .espacio {
+        height: 20px; /* Ajusta este valor para mover el título */
     }
 
     div[data-testid="stForm"] button {
@@ -39,7 +44,7 @@ st.markdown("""
         cursor: pointer !important;
     }
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
-    
+
     /* Estilo general para los campos de entrada */
     div[data-testid="stTextInput"] {
         margin-bottom: 1rem; /* Espaciado entre campos, ajustable */
@@ -50,26 +55,14 @@ st.markdown("""
         background-color: #d3d3d3 !important; /* Color gris claro */
         border-radius: 12px !important; 
     }
-
-    /* Mejora del botón 'Ver Contraseña' */
-    div[data-testid="stTextInput"] div {
-        display: inline; 
-        color: #666; 
-        cursor: pointer; 
-        font-size: 0.9rem; 
-        padding: 0; 
-        background-color: transparent; 
-        vertical-align: middle; /* Alinear verticalmente */
-    }
-    
-    div[data-testid="stTextInput"] div:hover {
-        color: #004488; 
-    }
     </style>
 """, unsafe_allow_html=True)
 
+# ESPACIO ARRIBA
+st.markdown('<div class="espacio"></div>', unsafe_allow_html=True)
+
 # TÍTULO PERSONALIZADO
-st.markdown("<h1>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
 
 # FUNCIONES
 def limpiar(t):
