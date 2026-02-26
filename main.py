@@ -30,7 +30,8 @@ st.markdown("""
     }
 
     div[data-testid="stTextInput"] input {
-        height: 3.5rem !important; 
+        height: 4rem !important; /* Aumenta la altura del cuadro de texto */
+        background-color: #d3d3d3 !important; /* Color gris claro */
         border-radius: 12px !important; 
     }
 
@@ -50,11 +51,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-
-
-
-
 
 # FUNCIONES
 def limpiar(t):
