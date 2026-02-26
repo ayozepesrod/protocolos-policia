@@ -76,9 +76,31 @@ try:
         # PANTALLA PRINCIPAL TRAS LOGIN
         st.success(f"Bienvenido/a, {st.session_state['usuario_nombre']}")
         
-        # Aquí ya puedes usar 'protocolos_df' para tu buscador
-        st.write("Datos de protocolos cargados correctamente.")
-        st.dataframe(protocolos_df.head()) # Muestra los primeros datos para probar
+        # --- PARTE DE VISUALIZACIÓN DE PROTOCOLOS ---
+
+if not resultado.empty:
+    st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
+    
+    for i, row in resultado.iterrows():
+        # Obtenemos el título y el contenido (ajusta a tus nombres de columna)
+        # Usamos .get() para que si no existe la columna no de error
+        titulo_protocolo = row.get('titulo', 'Protocolo sin nombre')
+        contenido_protocolo = row.get('contenido', row.get('descripcion', 'Sin contenido detallado'))
+        
+        # Creamos el desplegable (Expander)
+        # El emoji se puede personalizar o dejar uno fijo como 📄 o ⚖️
+        with st.expander(f"🔹 {titulo_protocolo}"):
+            st.markdown(f"""
+                <div style='padding: 10px; border-radius: 5px; border-left: 3px solid #004488;'>
+                    {contenido_protocolo}
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Si tienes una columna con enlaces o PDFs, puedes añadir un botón aquí
+            if 'enlace' in row and pd.notnull(row['enlace']):
+                st.link_button("Ver documento completo", row['enlace'])
+else:
+    st.warning("⚠️ No se encontraron protocolos que coincidan con la búsqueda.")
 
         if st.button("Cerrar Sesión"):
             st.session_state['autenticado'] = False
