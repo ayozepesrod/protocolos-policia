@@ -36,7 +36,7 @@ URL_DOCUMENTO = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084
 GID_PROTOCOLOS = "0"
 GID_USUARIOS = "142130076" 
 
-# 4. CARGA DE DATOS Y LOGICA
+# 4. CARGA DE DATOS
 try:
     @st.cache_data(ttl=300)
     def cargar_datos(url, gid):
@@ -51,7 +51,7 @@ try:
     if 'autenticado' not in st.session_state:
         st.session_state['autenticado'] = False
 
-    # --- LOGIN ---
+    # --- 5. LÓGICA DE LOGIN ---
     if not st.session_state['autenticado']:
         with st.form(key='login_form'):
             st.subheader("Acceso de Usuario")
@@ -72,7 +72,7 @@ try:
             else:
                 st.error("Usuario o contraseña incorrectos")
 
-    # --- PANTALLA PRINCIPAL TRAS LOGIN ---
+    # --- 6. PANTALLA PRINCIPAL (LOGUEADO) ---
     else:
         col_user, col_logout = st.columns([0.8, 0.2])
         col_user.success(f"Bienvenido/a, {st.session_state['usuario_nombre']}")
@@ -80,15 +80,40 @@ try:
             st.session_state['autenticado'] = False
             st.rerun()
 
-        # Buscador
-        busqueda = st.text_input("🔍 Buscar protocolo...")
+        # BUSCADOR
+        busqueda = st.text_input("🔍 Buscar protocolo, palabra clave o código...")
 
         if busqueda:
             termino = limpiar_texto(busqueda)
-            # Filtra en todas las columnas
+            
+            # Realizamos el filtro aquí para que 'resultado' siempre exista al usarse
             resultado = protocolos_df[
                 protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.astype(str))), axis=1)
             ]
 
             if not resultado.empty:
-                st
+                st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
+                
+                for i, row in resultado.iterrows():
+                    # Usamos .get() para evitar errores si las columnas cambian de nombre
+                    titulo = row.get('titulo', 'Sin Título')
+                    contenido = row.get('contenido', row.get('descripcion', 'Sin contenido disponible'))
+                    
+                    # DESPLEGABLES CERRADOS
+                    with st.expander(f"🔹 {titulo}"):
+                        st.markdown(f"""
+                            <div style='padding: 10px; border-radius: 5px; border-left: 3px solid #004488; background-color: #f9f9f9;'>
+                                {contenido}
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Botón opcional si hay enlaces
+                        if 'enlace' in row and pd.notnull(row['enlace']):
+                            st.link_button("🔗 Ver documento completo", row['enlace'])
+            else:
+                st.warning("⚠️ No se encontraron protocolos con ese criterio.")
+        else:
+            st.info("Escriba en el buscador para consultar la guía operativa.")
+
+except Exception as e:
+    st.error(f"Error general: {e}")
