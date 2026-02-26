@@ -6,30 +6,31 @@ import re
 # CONFIGURACIÓN DE PÁGINA
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# ESTILO CSS
+# ESTILO CSS ACTUALIZADO
 st.markdown("""
     <style>
+    /* Ocultar elementos de la interfaz de Streamlit */
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
 
-    /* Eliminar márgenes de toda la página */
-    body {
-        margin: 0; /* Elimina márgenes del body */
-        padding: 0; /* Elimina padding del body */
+    /* ELIMINAR ESPACIO SUPERIOR (Padding del contenedor principal) */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+        max-width: 95%;
     }
 
     /* Ajuste del título */
     .titulo {
-        margin: 0; /* Elimina los márgenes del título */
-        padding: 0; /* Asegura que no hay padding alrededor */
-        font-size: 2.5rem; /* Tamaño del texto */
-        color: #004488; /* Color del texto */
-        text-align: center; /* Centrando el texto */
-        position: relative; /* Permite ajustar la posición */
-        top: -20px; /* Mueve el título hacia arriba */
+        margin: 0;
+        padding: 0;
+        font-size: 2.5rem;
+        color: #004488;
+        text-align: center;
+        /* Eliminamos el 'top: -20px' anterior para usar el padding del contenedor */
     }
 
     div[data-testid="stForm"] {
-        margin-top: 10px; /* Ajustes de top a los formularios */
+        margin-top: 20px;
     }
 
     div[data-testid="stForm"] button {
@@ -44,72 +45,19 @@ st.markdown("""
         font-size: 1.2rem !important;
         cursor: pointer !important;
     }
+    
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
 
-    /* Estilo general para los campos de entrada */
-    div[data-testid="stTextInput"] {
-        margin-bottom: 1rem; /* Espaciado entre campos, ajustable */
-    }
-
     div[data-testid="stTextInput"] input {
-        height: 4rem !important; /* Aumenta la altura del cuadro de texto */
-        background-color: #d3d3d3 !important; /* Color gris claro */
+        height: 4rem !important;
+        background-color: #d3d3d3 !important;
         border-radius: 12px !important; 
     }
-
     </style>
 """, unsafe_allow_html=True)
 
-# TÍTULO PERSONALIZADO
+# TÍTULO PERSONALIZADO (Ahora estará pegado arriba)
 st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
 
-# FUNCIONES
-def limpiar(t):
-    if not t:
-        return ""
-    return ''.join(c for c in unicodedata.normalize('NFD', str(t))
-                  if unicodedata.category(c) != 'Mn').lower()
-
-def obtener_enlace_csv(url):
-    match = re.search(r"/d/([a-zA-Z0-9-_]+)", url)
-    if match:
-        return f"https://docs.google.com/spreadsheets/d/{match.group(1)}/export?format=csv"
-    return url
-
-# URL GOOGLE SHEETS
-url_protocolos = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
-url_usuarios = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
-
-try:
-    enlace_final = obtener_enlace_csv(url_protocolos)
-
-    @st.cache_data(ttl=300)
-    def cargar_datos(url):
-        return pd.read_csv(url)
-
-    @st.cache_data(ttl=300)
-    def cargar_usuarios(url):
-        return pd.read_csv(obtener_enlace_csv(url))
-
-    df = cargar_datos(enlace_final)
-    usuarios_df = cargar_usuarios(url_usuarios)
-
-    # Formulario de Inicio de Sesión
-    with st.form(key='login_form'):
-        nombre = st.text_input("Nombre")
-        contrasena = st.text_input("Contraseña", type="password")
-        login_button = st.form_submit_button(label='Iniciar Sesión')
-
-    if login_button:
-        usuario = usuarios_df[(usuarios_df['nombre'] == nombre) & (usuarios_df['contraseña'] == contrasena)]
-        
-        if not usuario.empty:
-            st.success("Inicio de sesión exitoso")
-            # Lógica de búsqueda y protocolos...
-
-        else:
-            st.error("Credenciales incorrectas")
-
-except Exception as e:
-    st.error(f"Error crítico en el sistema: {e}")
-    st.info("Ver verifica conexión con Google Sheets y estructura del archivo.")
+# --- RESTO DE TU CÓDIGO (Funciones y Lógica) ---
+# ... (Mantén aquí el resto de tus funciones y el formulario de login)
