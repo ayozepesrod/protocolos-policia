@@ -9,12 +9,12 @@ st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", l
 # ESTILO CSS
 st.markdown("""
     <style>
-    #MainMenu, footer, header, .stDeployButton {display:none !important;}
+    #MainMenu, footer, header, .stDeployButton {display: none !important;}
 
-    /* Ajuste del margen superior para el título */
+    /* Ajuste del título */
     h1 {
         margin: 0; /* Elimina el margen por defecto */
-        padding-top: 20px; /* Añade espaciado en la parte superior */
+        padding: 10px 0; /* Ajusta el padding */
         font-size: 2.5rem; /* Tamaño del texto */
         color: #004488; /* Color del texto */
         text-align: center; /* Centrando el texto */
