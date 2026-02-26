@@ -26,22 +26,22 @@ st.markdown("""
     div[data-testid="stTextInput"] input { height: 3.5rem !important; border-radius: 12px !important; }
 
     /* Mejora del botón 'Ver Contraseña' */
-    div[data-testid="stTextInput"] div:first-child {
-        background-color: transparent; /* Fondo transparente */
-        border: none; /* Sin borde */
-        padding: 0; /* Sin espaciado */
-        cursor: pointer; /* Cambiar cursor al pasar */
-        font-size: 1.2rem; /* Tamaño de fuente igual */
+    div[data-testid="stTextInput"] div {
+        display: inline-block; /* Cambiar a bloque en línea */
         color: #0066CC; /* Color del texto */
-        height: auto; /* Altura automática */
+        cursor: pointer; /* Cambiar cursor al pasar */
+        margin-left: -30px; /* Ajustar margen para que esté cerca del campo */
+        margin-top: 0; /* Margin superior a cero */
+        padding: 0; /* Sin espaciado */
     }
     
     /* Efecto hover */
-    div[data-testid="stTextInput"] div:first-child:hover {
+    div[data-testid="stTextInput"] div:hover {
         color: #004488; /* Color al pasar el mouse */
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 
