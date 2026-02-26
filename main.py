@@ -12,8 +12,9 @@ st.markdown("""
     #MainMenu, footer, header, .stDeployButton {display:none !important;}
 
     /* Ajuste del margen superior para el título */
-    .titulo {
-        margin-top: 10px; /* Ajusta este valor según lo necesites */
+    h1 {
+        margin: 0; /* Elimina el margen por defecto */
+        padding-top: 20px; /* Añade espaciado en la parte superior */
         font-size: 2.5rem; /* Tamaño del texto */
         color: #004488; /* Color del texto */
         text-align: center; /* Centrando el texto */
@@ -62,7 +63,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # TÍTULO PERSONALIZADO
-st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
+st.markdown("<h1>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
 
 # FUNCIONES
 def limpiar(t):
