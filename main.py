@@ -12,8 +12,11 @@ st.markdown("""
     #MainMenu, footer, header, .stDeployButton {display:none !important;}
 
     /* Ajuste del margen superior para el título */
-    h1 {
-        margin-top: 100px; /* Ajusta este valor según lo necesario */
+    .titulo {
+        margin-top: 10px; /* Ajusta este valor según lo necesites */
+        font-size: 2.5rem; /* Tamaño del texto */
+        color: #004488; /* Color del texto */
+        text-align: center; /* Centrando el texto */
     }
 
     div[data-testid="stForm"] button {
@@ -58,6 +61,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# TÍTULO PERSONALIZADO
+st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
+
 # FUNCIONES
 def limpiar(t):
     if not t:
@@ -74,8 +80,6 @@ def obtener_enlace_csv(url):
 # URL GOOGLE SHEETS
 url_protocolos = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 url_usuarios = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
-
-st.title("🛡️ Sistema de Consulta Operativa")
 
 try:
     enlace_final = obtener_enlace_csv(url_protocolos)
