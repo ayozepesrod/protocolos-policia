@@ -6,14 +6,13 @@ import re
 # 1. CONFIGURACIÓN
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS MEJORADO
+# 2. ESTILO CSS
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
     .block-container { padding-top: 0rem !important; margin-top: -30px; }
     .titulo { margin: 0; padding: 10px 0; font-size: 2.5rem; color: #004488; text-align: center; font-weight: bold; }
     
-    /* Estilo de las secciones dentro del protocolo */
     .seccion-header {
         color: #004488;
         font-weight: bold;
@@ -27,7 +26,13 @@ st.markdown("""
         padding: 5px 10px;
         border-radius: 5px;
         font-weight: bold;
-        color: #d32f2f; /* Rojo para cuantías/artículos */
+        color: #d32f2f;
+    }
+    /* Estilo para el icono del ojo en el input de contraseña */
+    button[aria-label="Show password"] {
+        transform: scale(0.7);
+        margin-right: -10px;
+        opacity: 0.6;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -56,6 +61,7 @@ try:
     @st.cache_data(ttl=300)
     def cargar_datos(url, gid):
         enlace = obtener_enlace_csv(url, gid)
+        # Cargamos y forzamos que todo sea tratado como texto inicialmente para evitar el error float
         df = pd.read_csv(enlace).fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
@@ -73,13 +79,17 @@ try:
             nombre_input = st.text_input("Nombre de Usuario")
             contrasena_input = st.text_input("Contraseña", type="password")
             if st.form_submit_button(label='ENTRAR'):
-                user = usuarios_df[(usuarios_df['nombre'].astype(str).str.lower() == nombre_input.lower().strip()) & 
-                                   (usuarios_df['contraseña'].astype(str) == contrasena_input.strip())]
+                # Busqueda de usuario ignorando mayúsculas/minúsculas
+                user = usuarios_df[
+                    (usuarios_df['nombre'].astype(str).str.lower() == nombre_input.lower().strip()) & 
+                    (usuarios_df['contraseña'].astype(str) == contrasena_input.strip())
+                ]
                 if not user.empty:
                     st.session_state['autenticado'] = True
                     st.session_state['usuario_nombre'] = user.iloc[0]['nombre']
                     st.rerun()
-                else: st.error("Credenciales incorrectas")
+                else: 
+                    st.error("Credenciales incorrectas")
 
     # --- 6. BUSCADOR Y RESULTADOS ---
     else:
@@ -93,31 +103,33 @@ try:
 
         if busqueda:
             termino = limpiar_texto(busqueda)
-            resultado = protocolos_df[protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)]
+            # EXPLICACIÓN DEL FIX: row.map(str) asegura que CADA celda sea texto antes de unir la fila para buscar
+            resultado = protocolos_df[
+                protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)
+            ]
 
             if not resultado.empty:
+                st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
                 for _, row in resultado.iterrows():
-                    # Usamos .get() para leer las columnas del Excel
                     titulo = row.get('titulo', 'Sin Título')
                     articulo = row.get('articulo', row.get('codigo', 'N/A'))
                     cuantia = row.get('cuantia', row.get('multa', 'N/A'))
                     hechos = row.get('hechos', 'No descritos')
                     diligencias = row.get('diligencias', 'No especificadas')
 
-                    # DESPLEGABLE CON DISEÑO DE FICHA
                     with st.expander(f"⚖️ {titulo} - Art. {articulo}"):
                         col_a, col_b = st.columns(2)
                         with col_a:
-                            st.markdown(f"<div class='seccion-header'>📌 Artículo / Código</div>", unsafe_allow_html=True)
+                            st.markdown("<div class='seccion-header'>📌 Artículo / Código</div>", unsafe_allow_html=True)
                             st.markdown(f"<span class='dato-importante'>{articulo}</span>", unsafe_allow_html=True)
                         with col_b:
-                            st.markdown(f"<div class='seccion-header'>💰 Cuantía / Sanción</div>", unsafe_allow_html=True)
+                            st.markdown("<div class='seccion-header'>💰 Cuantía / Sanción</div>", unsafe_allow_html=True)
                             st.markdown(f"<span class='dato-importante'>{cuantia}</span>", unsafe_allow_html=True)
 
-                        st.markdown(f"<div class='seccion-header'>📝 Hechos Concurrentes</div>", unsafe_allow_html=True)
+                        st.markdown("<div class='seccion-header'>📝 Hechos Concurrentes</div>", unsafe_allow_html=True)
                         st.write(hechos)
 
-                        st.markdown(f"<div class='seccion-header'>📋 Diligencias a realizar</div>", unsafe_allow_html=True)
+                        st.markdown("<div class='seccion-header'>📋 Diligencias a realizar</div>", unsafe_allow_html=True)
                         st.info(diligencias)
 
                         if 'observaciones' in row and row['observaciones']:
@@ -128,4 +140,4 @@ try:
             st.info("Utilice el buscador para localizar protocolos específicos.")
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error detectado: {e}")
