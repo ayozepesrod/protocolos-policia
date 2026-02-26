@@ -69,4 +69,39 @@ try:
         with st.form(key='login_form'):
             st.subheader("Acceso de Usuario")
             nombre_input = st.text_input("Nombre de Usuario")
-            contrasena_input = st.text
+            # AQUÍ ESTABA EL ERROR (Línea 72)
+            contrasena_input = st.text_input("Contraseña", type="password")
+            
+            if st.form_submit_button(label='ENTRAR'):
+                user = usuarios_df[
+                    (usuarios_df['nombre'].astype(str).str.lower() == nombre_input.lower().strip()) & 
+                    (usuarios_df['contraseña'].astype(str) == contrasena_input.strip())
+                ]
+                if not user.empty:
+                    st.session_state['autenticado'] = True
+                    st.session_state['usuario_nombre'] = user.iloc[0]['nombre']
+                    st.rerun()
+                else: 
+                    st.error("Credenciales incorrectas")
+
+    # --- 6. BUSCADOR Y RESULTADOS ---
+    else:
+        c1, c2 = st.columns([0.8, 0.2])
+        c1.write(f"👤 Agente: **{st.session_state['usuario_nombre']}**")
+        if c2.button("Cerrar Sesión"):
+            st.session_state['autenticado'] = False
+            st.rerun()
+
+        busqueda = st.text_input("🔍 Buscar por infracción, artículo o palabra clave...")
+
+        if busqueda:
+            termino = limpiar_texto(busqueda)
+            
+            def buscar_en_fila(row):
+                texto_fila = limpiar_texto(' '.join(row.astype(str)))
+                return termino in texto_fila
+
+            resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
+
+            if not resultado.empty:
+                st.write(f
