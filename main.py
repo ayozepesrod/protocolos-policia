@@ -23,26 +23,34 @@ st.markdown("""
         cursor: pointer !important;
     }
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
+    
+    /* Estilo general para los campos de entrada */
+    div[data-testid="stTextInput"] {
+        margin-bottom: 1rem; /* Espaciado entre campos, ajustable */
+    }
+
     div[data-testid="stTextInput"] input {
         height: 3.5rem !important; 
         border-radius: 12px !important; 
     }
-    
+
     /* Mejora del botón 'Ver Contraseña' */
     div[data-testid="stTextInput"] div {
-        display: inline; /* Cambiar para alinearse mejor */
-        color: #888; /* Color neutro */
-        cursor: pointer; /* Cambiar cursor al pasar */
-        margin-left: -30px; /* Ajustar margen para que esté cerca del campo */
-        font-size: 1rem; /* Tamaño de fuente más pequeño */
+        display: inline; 
+        color: #666; 
+        cursor: pointer; 
+        font-size: 0.9rem; 
+        padding: 0; 
+        background-color: transparent; 
+        vertical-align: middle; /* Alinear verticalmente */
     }
     
-    /* Efecto hover */
     div[data-testid="stTextInput"] div:hover {
-        color: #004488; /* Color al pasar el mouse */
+        color: #004488; 
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 
