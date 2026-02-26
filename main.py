@@ -21,6 +21,7 @@ st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", uns
 # 3. FUNCIONES
 def limpiar_texto(t):
     if not t: return ""
+    # Convertimos a string por seguridad y limpiamos tildes
     return ''.join(c for c in unicodedata.normalize('NFD', str(t))
                   if unicodedata.category(c) != 'Mn').lower()
 
@@ -42,6 +43,8 @@ try:
     def cargar_datos(url, gid):
         enlace = obtener_enlace_csv(url, gid)
         df = pd.read_csv(enlace)
+        # Reemplazar valores nulos (NaN) por texto vacío para evitar errores de búsqueda
+        df = df.fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
 
@@ -86,29 +89,26 @@ try:
         if busqueda:
             termino = limpiar_texto(busqueda)
             
-            # Realizamos el filtro aquí para que 'resultado' siempre exista al usarse
+            # FILTRO CORREGIDO: Convertimos explícitamente cada celda a string antes de unir
             resultado = protocolos_df[
-                protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.astype(str))), axis=1)
+                protocolos_df.apply(lambda row: termino in limpiar_texto(' '.join(row.map(str))), axis=1)
             ]
 
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
                 
                 for i, row in resultado.iterrows():
-                    # Usamos .get() para evitar errores si las columnas cambian de nombre
                     titulo = row.get('titulo', 'Sin Título')
                     contenido = row.get('contenido', row.get('descripcion', 'Sin contenido disponible'))
                     
-                    # DESPLEGABLES CERRADOS
                     with st.expander(f"🔹 {titulo}"):
                         st.markdown(f"""
-                            <div style='padding: 10px; border-radius: 5px; border-left: 3px solid #004488; background-color: #f9f9f9;'>
+                            <div style='padding: 10px; border-radius: 5px; border-left: 3px solid #004488; background-color: #f9f9f9; color: #333;'>
                                 {contenido}
                             </div>
                         """, unsafe_allow_html=True)
                         
-                        # Botón opcional si hay enlaces
-                        if 'enlace' in row and pd.notnull(row['enlace']):
+                        if 'enlace' in row and row['enlace'] != "":
                             st.link_button("🔗 Ver documento completo", row['enlace'])
             else:
                 st.warning("⚠️ No se encontraron protocolos con ese criterio.")
