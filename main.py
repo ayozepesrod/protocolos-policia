@@ -6,13 +6,13 @@ import re
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS ACTUALIZADO
+# 2. ESTILO CSS (Título arriba, inputs limpios y botón de contraseña pequeño)
 st.markdown("""
     <style>
-    /* Ocultar elementos nativos */
+    /* Ocultar elementos nativos de Streamlit */
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
 
-    /* Subir el contenido al borde superior */
+    /* Eliminar el espacio superior del contenedor principal */
     .block-container {
         padding-top: 0rem !important; 
         padding-bottom: 0rem !important;
@@ -28,44 +28,44 @@ st.markdown("""
         text-align: center;
     }
 
-    /* AJUSTE DEL BOTÓN "OJO" (VER CONTRASEÑA) */
-    /* Lo hacemos más pequeño y lo desplazamos un poco a la derecha */
+    /* Ajuste del botón "ojo" (ver contraseña) para que sea más pequeño y discreto */
     button[aria-label="Show password"] {
-        transform: scale(0.7); /* Reduce el tamaño al 70% */
-        margin-right: -10px;    /* Lo pega más al borde derecho */
-        opacity: 0.7;          /* Lo hace un poco más sutil */
+        transform: scale(0.7); /* Reduce el tamaño */
+        margin-right: -10px;    /* Lo desplaza a la derecha */
+        opacity: 0.6;          /* Lo hace más tenue */
     }
 
     /* Estilo para el formulario */
     div[data-testid="stForm"] {
-        margin-top: 10px;
+        margin-top: 15px;
+        border: 1px solid #ddd;
+        padding: 2rem;
+        border-radius: 15px;
     }
 
+    /* Estilo del botón de acceso */
     div[data-testid="stForm"] button[kind="primaryFormSubmit"] {
         background-color: #004488 !important;
         color: white !important;
-        border: none !important;
-        padding: 0.75rem 1rem !important;
         border-radius: 12px !important;
-        font-weight: bold !important;
         width: 100% !important;
         height: 3.8rem !important;
         font-size: 1.2rem !important;
-        cursor: pointer !important;
+        font-weight: bold !important;
     }
     
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
 
-    /* Estilo de los inputs */
+    /* Estilo de los cuadros de texto */
     div[data-testid="stTextInput"] input {
-        height: 4rem !important;
-        background-color: #e0e0e0 !important; /* Gris un poco más suave */
-        border-radius: 12px !important; 
+        height: 3.5rem !important;
+        background-color: #f0f2f6 !important;
+        border-radius: 10px !important; 
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. TÍTULO
+# 3. TÍTULO (Pegado a la parte superior)
 st.markdown("<h1 class='titulo'>🛡️ Sistema de Consulta Operativa</h1>", unsafe_allow_html=True)
 
 # 4. FUNCIONES
@@ -80,39 +80,43 @@ def obtener_enlace_csv(url):
         return f"https://docs.google.com/spreadsheets/d/{match.group(1)}/export?format=csv"
     return url
 
-# 5. URLS
-url_protocolos = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
-url_usuarios = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
+# 5. URLS DE GOOGLE SHEETS
+url_base = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit?usp=sharing"
 
-# 6. LÓGICA
+# 6. LÓGICA DE CARGA Y LOGIN
 try:
-    enlace_final = obtener_enlace_csv(url_protocolos)
-
-    @st.cache_data(ttl=300)
-    def cargar_datos(url):
-        return pd.read_csv(url)
-
     @st.cache_data(ttl=300)
     def cargar_usuarios(url):
+        # Cargamos la hoja que contiene la tabla de usuarios
         return pd.read_csv(obtener_enlace_csv(url))
 
-    df = cargar_datos(enlace_final)
-    usuarios_df = cargar_usuarios(url_usuarios)
+    usuarios_df = cargar_usuarios(url_base)
 
-    # Formulario
+    # Formulario de Inicio de Sesión
     with st.form(key='login_form'):
-        nombre = st.text_input("Nombre")
-        contrasena = st.text_input("Contraseña", type="password")
-        login_button = st.form_submit_button(label='Iniciar Sesión')
+        st.subheader("Acceso de Usuario")
+        nombre_input = st.text_input("Nombre de Usuario")
+        contrasena_input = st.text_input("Contraseña", type="password")
+        login_button = st.form_submit_button(label='ENTRAR')
 
     if login_button:
-        usuario = usuarios_df[(usuarios_df['nombre'].astype(str) == nombre) & 
-                             (usuarios_df['contraseña'].astype(str) == contrasena)]
+        # Validamos nombre y contraseña ignorando mayúsculas/minúsculas en el nombre
+        # Asegúrate de que las columnas en tu Excel se llamen exactamente 'nombre' y 'contraseña'
+        usuario_encontrado = usuarios_df[
+            (usuarios_df['nombre'].astype(str).str.strip().str.lower() == nombre_input.strip().lower()) & 
+            (usuarios_df['contraseña'].astype(str) == contrasena_input)
+        ]
         
-        if not usuario.empty:
-            st.success("Inicio de sesión exitoso")
+        if not usuario_encontrado.empty:
+            # Si hay duplicados de nombre, el sistema ahora puede usar el ID interno 
+            # para saber exactamente quién entró
+            id_real = usuario_encontrado.iloc[0]['id']
+            nombre_real = usuario_encontrado.iloc[0]['nombre']
+            
+            st.success(f"Sesión iniciada: {nombre_real} (ID: {id_real})")
+            # Aquí iría el resto de tu programa (buscador de protocolos)
         else:
-            st.error("Credenciales incorrectas")
+            st.error("Usuario o contraseña incorrectos")
 
 except Exception as e:
-    st.error(f"Error crítico: {e}")
+    st.error(f"Error de conexión: {e}")
