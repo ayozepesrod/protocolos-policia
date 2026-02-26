@@ -30,14 +30,6 @@ st.markdown("""
         display: inline-block;
         margin-top: 5px;
     }
-    .tag-container {
-        background-color: #f0f2f6;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        color: #555;
-        border: 1px solid #ccc;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -115,33 +107,29 @@ try:
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
                 for _, row in resultado.iterrows():
-                    # Extracción de datos
-                    titulo = row.get('titulo', 'Protocolo sin título')
+                    # Extracción de datos (Normalizada a minúsculas por cargar_datos)
+                    titulo = row.get('titulo', 'Sin título')
                     norma = row.get('norma', 'LSV')
-                    art = row.get('art', row.get('articulo', '---'))
+                    art = row.get('art', '---')
                     apt = row.get('apt', '-')
                     opc = row.get('opc', '-')
                     ptos = row.get('ptos', '0')
                     calif = row.get('calif', 'Grave')
-                    multa = row.get('multa', row.get('cuantia', '0'))
+                    multa = row.get('multa', '0')
                     imp_rd = row.get('imp_rd', '0')
-                    denuncia = row.get('texto_denuncia_integro', row.get('hechos', 'No disponible'))
-                    notas=row.get('notas', row.get('notas', 'No disponible))
+                    denuncia = row.get('texto_denuncia_integro', 'No disponible')
                     diligencias = row.get('diligencias', 'No especificadas')
                     p_clave = row.get('palabras_clave', '')
-                    obs = row.get('observaciones', '')
+                    notas = row.get('notas', 'Sin notas adicionales')
 
-                    # --- DISEÑO DE LA FICHA (ORDEN OPERATIVO) ---
+                    # --- DISEÑO DE LA FICHA ---
                     with st.expander(f"⚖️ {titulo} | {norma} Art. {art}"):
                         if p_clave:
                             st.caption(f"🔑 Palabras clave: {p_clave}")
                         
-                        # BLOQUE 1: EL PROTOCOLO (PRIORIDAD)
                         st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
                         st.info(diligencias)
-                       
 
-                        # BLOQUE 2: DATOS TÉCNICOS
                         col1, col2, col3, col4 = st.columns(4)
                         with col1:
                             st.markdown("<div class='seccion-header'>📌 Código</div>", unsafe_allow_html=True)
@@ -156,17 +144,11 @@ try:
                             st.markdown("<div class='seccion-header'>💰 Multa</div>", unsafe_allow_html=True)
                             st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
 
-                        # BLOQUE 3: TEXTO PARA EL BOLETÍN
                         st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
                         st.success(denuncia)
 
-                         # BLOQUE 4: NOTAS
-                        st.markdown("<div class='seccion-header'>📝 NOTAS</div>", unsafe_allow_html=True)
-                        st.success(notas)
-                       
-
-                        if obs:
-                            st.warning(f"**Observaciones:** {obs}")
+                        st.markdown("<div class='seccion-header'>📑 NOTAS COMPLEMENTARIAS</div>", unsafe_allow_html=True)
+                        st.warning(notas)
 
             else:
                 st.warning(f"No hay resultados para: {busqueda}")
