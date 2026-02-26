@@ -24,17 +24,24 @@ st.markdown("""
     }
     div[data-testid="stForm"] button:active { background-color: #002244 !important; }
     div[data-testid="stTextInput"] input { height: 3.5rem !important; border-radius: 12px !important; }
-    
-    /* Ocultar el botón 'Ver Contraseña' */
-    div[data-testid="stTextInput"] div [class*="stButton"] {
-        display: none; /* Oculta el botón "Ver" */
-    }
 
-    div[data-testid="stTextInput"] {
-        margin-top: 10px; /* Espaciado superior más limpio */
+    /* Mejora del botón 'Ver Contraseña' */
+    div[data-testid="stTextInput"] div:first-child {
+        background-color: #008CBA; /* Color de fondo */
+        border-radius: 5px; /* Bordes redondeados */
+        padding: 0.35rem; /* Espaciado */
+        cursor: pointer; /* Cambiar cursor al pasar */
+        color: white; /* Color del texto */
+        text-align: center; /* Centrar texto */
+    }
+    
+    /* Efecto hover */
+    div[data-testid="stTextInput"] div:first-child:hover {
+        background-color: #007B9A; /* Color al pasar el mouse */
     }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
+
 
 # FUNCIONES
 def limpiar(t):
