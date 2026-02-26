@@ -158,6 +158,10 @@ try:
                         # BLOQUE 3: TEXTO PARA EL BOLETÍN
                         st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
                         st.success(denuncia)
+
+                         # BLOQUE 4: NOTAS
+                        st.markdown("<div class='seccion-header'>📝 NOTAS</div>", unsafe_allow_html=True)
+                        st.success(notas)
                        
 
                         if obs:
