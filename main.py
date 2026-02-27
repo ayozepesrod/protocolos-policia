@@ -52,6 +52,13 @@ def obtener_enlace_csv(url, gid="0"):
         return f"https://docs.google.com/spreadsheets/d/{doc_id}/export?format=csv&gid={gid}"
     return url
 
+# 🔹 Mapa de emojis global
+mapa_emojis = {
+    "vmp": "🛴",
+    "alcohol": "🍺",
+    "movil": "📱"
+}
+
 # --- 4. CARGA DE DATOS ---
 URL_DOCUMENTO = "https://docs.google.com/spreadsheets/d/1soQluu2y1XMFGuN-Qur6084EcbqLBNd7aq1nql_TS9Y/edit"
 GID_PROTOCOLOS = "0"
@@ -63,8 +70,11 @@ try:
         enlace = obtener_enlace_csv(url, gid)
         df = pd.read_csv(enlace).fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
-        # 🔹 Columna de texto para búsqueda rápida
-        df['texto_busqueda'] = df.apply(lambda row: limpiar_texto(' '.join(row.astype(str))), axis=1)
+
+        # 🔥 Mejora de rendimiento (búsqueda rápida)
+        df['texto_busqueda'] = df.apply(
+            lambda row: limpiar_texto(' '.join(row.astype(str))), axis=1
+        )
         return df
 
     usuarios_df = cargar_datos(URL_DOCUMENTO, GID_USUARIOS)
@@ -119,72 +129,58 @@ try:
                 for _, row in resultado.iterrows():
                     titulo = row.get('titulo', 'Sin título')
 
-                    # 🔹 Emoji limpio y robusto
+                    # 🔹 Emoji robusto
                     emoji = row.get('emoji')
                     if not emoji or (isinstance(emoji, float) and math.isnan(emoji)):
                         categoria = str(row.get('categoria', '')).lower()
-                       # 🔹 Mapa de emojis global (fuera del loop)
-mapa_emojis = {
-    "vmp": "🛴",
-    "alcohol": "🍺",
-    "movil": "📱"
-}
+                        emoji = mapa_emojis.get(categoria, '⚖️')
+                    else:
+                        emoji = str(emoji).strip()
 
-for _, row in resultado.iterrows():
-    titulo = row.get('titulo', 'Sin título')
+                    norma = row.get('norma', 'LSV')
+                    art = row.get('art', '---')
+                    apt = row.get('apt', '-')
+                    opc = row.get('opc', '-')
+                    ptos = row.get('ptos', '0')
+                    calif = row.get('calif', 'Grave')
+                    multa = row.get('multa', '0')
+                    imp_rd = row.get('imp_rd', '0')
+                    denuncia = row.get('texto_denuncia_integro', 'No disponible')
+                    diligencias = row.get('diligencias', 'No especificadas')
+                    p_clave = row.get('palabras_clave', '')
+                    notas = row.get('notas', 'Sin notas adicionales')
 
-    # 🔹 Emoji limpio y robusto
-    emoji = row.get('emoji')
-    if not emoji or (isinstance(emoji, float) and math.isnan(emoji)):
-        categoria = str(row.get('categoria', '')).lower()
-        emoji = mapa_emojis.get(categoria, '⚖️')
-    else:
-        emoji = str(emoji).strip()
+                    with st.expander(f"{emoji} {titulo} | {norma} Art. {art}"):
 
-    # Resto de variables
-    norma = row.get('norma', 'LSV')
-    art = row.get('art', '---')
-    apt = row.get('apt', '-')
-    opc = row.get('opc', '-')
-    ptos = row.get('ptos', '0')
-    calif = row.get('calif', 'Grave')
-    multa = row.get('multa', '0')
-    imp_rd = row.get('imp_rd', '0')
-    denuncia = row.get('texto_denuncia_integro', 'No disponible')
-    diligencias = row.get('diligencias', 'No especificadas')
-    p_clave = row.get('palabras_clave', '')
-    notas = row.get('notas', 'Sin notas adicionales')
+                        if p_clave:
+                            st.caption(f"🔑 Palabras clave: {p_clave}")
 
-    with st.expander(f"{emoji} {titulo} | {norma} Art. {art}"):
-        if p_clave:
-            st.caption(f"🔑 Palabras clave: {p_clave}")
+                        st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
+                        st.info(diligencias)
 
-        st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
-        st.info(diligencias)
+                        col1, col2, col3, col4 = st.columns(4)
 
-        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.markdown("<div class='seccion-header'>📌 Código</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{norma} {art} {apt} / {opc}</span>", unsafe_allow_html=True)
 
-        with col1:
-            st.markdown("<div class='seccion-header'>📌 Código</div>", unsafe_allow_html=True)
-            st.markdown(f"<span class='dato-importante'>{norma} {art} {apt} / {opc}</span>", unsafe_allow_html=True)
+                        with col2:
+                            st.markdown("<div class='seccion-header'>⭐ Puntos</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{ptos} ptos</span>", unsafe_allow_html=True)
 
-        with col2:
-            st.markdown("<div class='seccion-header'>⭐ Puntos</div>", unsafe_allow_html=True)
-            st.markdown(f"<span class='dato-importante'>{ptos} ptos</span>", unsafe_allow_html=True)
+                        with col3:
+                            st.markdown("<div class='seccion-header'>⚠️ Calif.</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{calif}</span>", unsafe_allow_html=True)
 
-        with col3:
-            st.markdown("<div class='seccion-header'>⚠️ Calif.</div>", unsafe_allow_html=True)
-            st.markdown(f"<span class='dato-importante'>{calif}</span>", unsafe_allow_html=True)
+                        with col4:
+                            st.markdown("<div class='seccion-header'>💰 Multa</div>", unsafe_allow_html=True)
+                            st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
 
-        with col4:
-            st.markdown("<div class='seccion-header'>💰 Multa</div>", unsafe_allow_html=True)
-            st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
+                        st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
+                        st.success(denuncia)
 
-        st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
-        st.success(denuncia)
-
-        st.markdown("<div class='seccion-header'>📑 NOTAS COMPLEMENTARIAS</div>", unsafe_allow_html=True)
-        st.warning(notas)
+                        st.markdown("<div class='seccion-header'>📑 NOTAS COMPLEMENTARIAS</div>", unsafe_allow_html=True)
+                        st.warning(notas)
 
             else:
                 st.warning(f"No hay resultados para: {busqueda}")
