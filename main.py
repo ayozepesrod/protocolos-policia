@@ -96,13 +96,13 @@ try:
         busqueda = st.text_input("🔍 Buscar por infracción, artículo, puntos o palabra clave...")
 
         if busqueda:
-           terminos = limpiar_texto(busqueda).split()
+    terminos = limpiar_texto(busqueda).split()
 
-            def buscar_en_fila(row):
-            texto_fila = limpiar_texto(' '.join(row.astype(str)))
-            return all(t in texto_fila for t in terminos)
+    def buscar_en_fila(row):
+        texto_fila = limpiar_texto(' '.join(row.astype(str)))
+        return all(t in texto_fila for t in terminos)
 
-            resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
+    resultado = protocolos_df[protocolos_df.apply(buscar_en_fila, axis=1)]
 
             if not resultado.empty:
                 st.write(f"✅ Se han encontrado {len(resultado)} protocolos:")
