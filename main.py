@@ -122,6 +122,7 @@ try:
                     titulo = row.get('titulo', 'Sin título')
 
                     # 🔹 Emoji limpio y robusto
+                import math
                    emoji = str(row.get('emoji', '')).strip()
                     if not emoji:
                         categoria = str(row.get('categoria', '')).lower()
