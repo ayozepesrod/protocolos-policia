@@ -120,7 +120,18 @@ try:
 
                 for _, row in resultado.iterrows():
                     titulo = row.get('titulo', 'Sin título')
-                    emoji = row.get('emoji', '⚖️')  # valor por defecto
+                    # 🔹 Emoji limpio
+                    emoji = str(row.get('emoji', '')).strip()
+                    if not emoji:
+                        # fallback automático según categoría
+                        categoria = str(row.get('categoria', '')).lower()
+                        mapa_emojis = {
+                            "vmp": "🛴",
+                            "alcohol": "🍺",
+                            "movil": "📱"
+                        }
+                        emoji = mapa_emojis.get(categoria, '⚖️')
+
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', '---')
                     apt = row.get('apt', '-')
