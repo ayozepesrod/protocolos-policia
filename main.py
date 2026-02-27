@@ -122,7 +122,7 @@ try:
                     titulo = row.get('titulo', 'Sin título')
 
                     # 🔹 Emoji limpio y robusto
-                    emoji = str(row.get('emoji', '')).strip()
+                   emoji = str(row.get('emoji', '')).strip()
                     if not emoji:
                         categoria = str(row.get('categoria', '')).lower()
                         mapa_emojis = {
@@ -130,7 +130,7 @@ try:
                             "alcohol": "🍺",
                             "movil": "📱"
                         }
-                        emoji = mapa_emojis.get(categoria, '⚖️')
+                    emoji = mapa_emojis.get(categoria, '⚖️')
 
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', '---')
