@@ -125,12 +125,12 @@ try:
                     if not emoji:
                     emoji = '⚖️'  # solo usa ⚖️ si no hay nada en la columna
                     categoria = str(row.get('categoria', '')).lower()
-                        mapa_emojis = {
-                            "vmp": "🛴",
-                            "alcohol": "🍺",
-                            "movil": "📱"
-                        }
-                        emoji = mapa_emojis.get(categoria, '⚖️')
+                    mapa_emojis = {
+                    "vmp": "🛴",
+                    "alcohol": "🍺",
+                    "movil": "📱"
+                    }
+                    emoji = mapa_emojis.get(categoria, '⚖️')
 
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', '---')
