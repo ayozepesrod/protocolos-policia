@@ -120,17 +120,17 @@ try:
 
                 for _, row in resultado.iterrows():
                     titulo = row.get('titulo', 'Sin título')
-                    # 🔹 Emoji limpio
-                   emoji = str(row.get('emoji', '')).strip()  # intenta leer emoji
+
+                    # 🔹 Emoji limpio y robusto
+                    emoji = str(row.get('emoji', '')).strip()
                     if not emoji:
-                    emoji = '⚖️'  # solo usa ⚖️ si no hay nada en la columna
-                    categoria = str(row.get('categoria', '')).lower()
-                    mapa_emojis = {
-                    "vmp": "🛴",
-                    "alcohol": "🍺",
-                    "movil": "📱"
-                    }
-                    emoji = mapa_emojis.get(categoria, '⚖️')
+                        categoria = str(row.get('categoria', '')).lower()
+                        mapa_emojis = {
+                            "vmp": "🛴",
+                            "alcohol": "🍺",
+                            "movil": "📱"
+                        }
+                        emoji = mapa_emojis.get(categoria, '⚖️')
 
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', '---')
