@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import unicodedata
 import re
+import math
 
 # 1. CONFIGURACIÓN
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
@@ -62,11 +63,8 @@ try:
         enlace = obtener_enlace_csv(url, gid)
         df = pd.read_csv(enlace).fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
-
-        # 🔥 Mejora de rendimiento (búsqueda rápida)
-        df['texto_busqueda'] = df.apply(
-            lambda row: limpiar_texto(' '.join(row.astype(str))), axis=1
-        )
+        # 🔹 Columna de texto para búsqueda rápida
+        df['texto_busqueda'] = df.apply(lambda row: limpiar_texto(' '.join(row.astype(str))), axis=1)
         return df
 
     usuarios_df = cargar_datos(URL_DOCUMENTO, GID_USUARIOS)
@@ -122,16 +120,17 @@ try:
                     titulo = row.get('titulo', 'Sin título')
 
                     # 🔹 Emoji limpio y robusto
-                import math
-                   emoji = str(row.get('emoji', '')).strip()
-                    if not emoji:
+                    emoji = row.get('emoji')
+                    if not emoji or (isinstance(emoji, float) and math.isnan(emoji)):
                         categoria = str(row.get('categoria', '')).lower()
                         mapa_emojis = {
                             "vmp": "🛴",
                             "alcohol": "🍺",
                             "movil": "📱"
                         }
-                    emoji = mapa_emojis.get(categoria, '⚖️')
+                        emoji = mapa_emojis.get(categoria, '⚖️')
+                    else:
+                        emoji = str(emoji).strip()
 
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', '---')
