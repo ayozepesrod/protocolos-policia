@@ -121,10 +121,10 @@ try:
                 for _, row in resultado.iterrows():
                     titulo = row.get('titulo', 'Sin título')
                     # 🔹 Emoji limpio
-                    emoji = str(row.get('emoji', '')).strip()
+                   emoji = str(row.get('emoji', '')).strip()  # intenta leer emoji
                     if not emoji:
-                        # fallback automático según categoría
-                        categoria = str(row.get('categoria', '')).lower()
+                    emoji = '⚖️'  # solo usa ⚖️ si no hay nada en la columna
+                    categoria = str(row.get('categoria', '')).lower()
                         mapa_emojis = {
                             "vmp": "🛴",
                             "alcohol": "🍺",
