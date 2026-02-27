@@ -120,6 +120,7 @@ try:
 
                 for _, row in resultado.iterrows():
                     titulo = row.get('titulo', 'Sin título')
+                    emoji = row.get('emoji', '⚖️')  # valor por defecto
                     norma = row.get('norma', 'LSV')
                     art = row.get('art', '---')
                     apt = row.get('apt', '-')
@@ -133,7 +134,7 @@ try:
                     p_clave = row.get('palabras_clave', '')
                     notas = row.get('notas', 'Sin notas adicionales')
 
-                    with st.expander(f"⚖️ {titulo} | {norma} Art. {art}"):
+                    with st.expander(f"{emoji} {titulo} | {norma} Art. {art}"):
 
                         if p_clave:
                             st.caption(f"🔑 Palabras clave: {p_clave}")
