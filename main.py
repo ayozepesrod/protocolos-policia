@@ -95,7 +95,7 @@ try:
 
         busqueda = st.text_input("🔍 Buscar por infracción, artículo, puntos o palabra clave...")
 
-        if busqueda:
+       if busqueda:
     terminos = limpiar_texto(busqueda).split()
 
     def buscar_en_fila(row):
