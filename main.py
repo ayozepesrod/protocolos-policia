@@ -7,7 +7,8 @@ import math
 # 1. CONFIGURACIÓN
 st.set_page_config(page_title="Guía Operativa Policial", page_icon="🛡️", layout="wide")
 
-# 2. ESTILO CSS
+# 2. ESTILO CSS ACTUALIZADO
+# He cambiado .dato-importante a display: block para que las líneas se apilen correctamente
 st.markdown("""
     <style>
     #MainMenu, footer, header, .stDeployButton {display: none !important;}
@@ -24,12 +25,14 @@ st.markdown("""
     }
     .dato-importante {
         background-color: #e8f0f7;
-        padding: 5px 10px;
+        padding: 8px 10px;
         border-radius: 5px;
         font-weight: bold;
         color: #d32f2f;
-        display: inline-block;
+        display: block; 
         margin-top: 5px;
+        line-height: 1.4;
+        text-align: center;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -52,7 +55,13 @@ def obtener_enlace_csv(url, gid="0"):
         return f"https://docs.google.com/spreadsheets/d/{doc_id}/export?format=csv&gid={gid}"
     return url
 
-# 🔹 Mapa de emojis global
+# Función para manejar multidenuncias (separa por / y pone saltos de línea)
+def formatear_multivalor(valor, sufijo=""):
+    if not valor: return "-"
+    items = str(valor).split('/')
+    return "<br>".join([f"{item.strip()}{sufijo}" for item in items])
+
+# Mapa de emojis global
 mapa_emojis = {
     "vmp": "🛴",
     "alcohol": "🍺",
@@ -70,8 +79,6 @@ try:
         enlace = obtener_enlace_csv(url, gid)
         df = pd.read_csv(enlace).fillna("")
         df.columns = [str(c).strip().lower() for c in df.columns]
-
-        # 🔥 Mejora de rendimiento (búsqueda rápida)
         df['texto_busqueda'] = df.apply(
             lambda row: limpiar_texto(' '.join(row.astype(str))), axis=1
         )
@@ -116,7 +123,6 @@ try:
 
         if busqueda:
             terminos = limpiar_texto(busqueda).split()
-
             resultado = protocolos_df[
                 protocolos_df['texto_busqueda'].apply(
                     lambda texto: all(t in texto for t in terminos)
@@ -129,7 +135,7 @@ try:
                 for _, row in resultado.iterrows():
                     titulo = row.get('titulo', 'Sin título')
 
-                    # 🔹 Emoji robusto
+                    # Gestión de Emojis
                     emoji = row.get('emoji')
                     if not emoji or (isinstance(emoji, float) and math.isnan(emoji)):
                         categoria = str(row.get('categoria', '')).lower()
@@ -137,54 +143,65 @@ try:
                     else:
                         emoji = str(emoji).strip()
 
-                    norma = row.get('norma', 'LSV')
-                    art = row.get('art', '---')
-                    apt = row.get('apt', '-')
-                    opc = row.get('opc', '-')
-                    ptos = row.get('ptos', '0')
-                    calif = row.get('calif', 'Grave')
-                    multa = row.get('multa', '0')
-                    imp_rd = row.get('imp_rd', '0')
-                    denuncia = row.get('texto_denuncia_integro', 'No disponible')
-                    diligencias = row.get('diligencias', 'No especificadas')
-                    p_clave = row.get('palabras_clave', '')
-                    notas = row.get('notas', 'Sin notas adicionales')
+                    # Renderizado del Expander
+                    norma_principal = str(row.get('norma', '')).split('/')[0]
+                    art_principal = str(row.get('art', '')).split('/')[0]
+                    
+                    with st.expander(f"{emoji} {titulo} | {norma_principal} Art. {art_principal}"):
 
-                    with st.expander(f"{emoji} {titulo} | {norma} Art. {art}"):
-
-                        if p_clave:
-                            st.caption(f"🔑 Palabras clave: {p_clave}")
+                        if row.get('palabras_clave'):
+                            st.caption(f"🔑 Palabras clave: {row['palabras_clave']}")
 
                         st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
-                        st.info(diligencias)
+                        st.info(row.get('diligencias', 'No especificadas'))
 
                         col1, col2, col3, col4 = st.columns(4)
 
                         with col1:
                             st.markdown("<div class='seccion-header'>📌 Código</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{norma} {art} {apt} / {opc}</span>", unsafe_allow_html=True)
+                            # Unimos Norma, Art, Apt y Opc de forma inteligente
+                            n_list = str(row.get('norma', '')).split('/')
+                            a_list = str(row.get('art', '')).split('/')
+                            ap_list = str(row.get('apt', '')).split('/')
+                            o_list = str(row.get('opc', '')).split('/')
+                            
+                            codigos_formateados = []
+                            for i in range(len(n_list)):
+                                n = n_list[i].strip()
+                                a = a_list[i].strip() if i < len(a_list) else ""
+                                ap = ap_list[i].strip() if i < len(ap_list) else ""
+                                o = o_list[i].strip() if i < len(o_list) else ""
+                                codigos_formateados.append(f"{n} {a} {ap} {o}".strip())
+                            
+                            st.markdown(f"<div class='dato-importante'>{'<br>'.join(codigos_formateados)}</div>", unsafe_allow_html=True)
 
                         with col2:
                             st.markdown("<div class='seccion-header'>⭐ Puntos</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{ptos} ptos</span>", unsafe_allow_html=True)
+                            st.markdown(f"<div class='dato-importante'>{formatear_multivalor(row.get('ptos', '0'), ' ptos')}</div>", unsafe_allow_html=True)
 
                         with col3:
                             st.markdown("<div class='seccion-header'>⚠️ Calif.</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{calif}</span>", unsafe_allow_html=True)
+                            st.markdown(f"<div class='dato-importante'>{formatear_multivalor(row.get('calif', 'Grave'))}</div>", unsafe_allow_html=True)
 
                         with col4:
                             st.markdown("<div class='seccion-header'>💰 Multa</div>", unsafe_allow_html=True)
-                            st.markdown(f"<span class='dato-importante'>{multa}€ ({imp_rd}€)</span>", unsafe_allow_html=True)
+                            # Lógica para emparejar Multa con Importe Reducido
+                            m_raw = str(row.get('multa', '0')).split('/')
+                            rd_raw = str(row.get('imp_rd', '0')).split('/')
+                            multas_finales = []
+                            for i in range(len(m_raw)):
+                                m_val = m_raw[i].strip()
+                                rd_val = rd_raw[i].strip() if i < len(rd_raw) else "?"
+                                multas_finales.append(f"{m_val}€ ({rd_val}€)")
+                            st.markdown(f"<div class='dato-importante'>{'<br>'.join(multas_finales)}</div>", unsafe_allow_html=True)
 
                         st.markdown("<div class='seccion-header'>📝 TEXTO ÍNTEGRO PARA DENUNCIA</div>", unsafe_allow_html=True)
-                        st.success(denuncia)
+                        st.success(row.get('texto_denuncia_integro', 'No disponible'))
 
                         st.markdown("<div class='seccion-header'>📑 NOTAS COMPLEMENTARIAS</div>", unsafe_allow_html=True)
-                        st.warning(notas)
-
+                        st.warning(row.get('notas', 'Sin notas adicionales'))
             else:
                 st.warning(f"No hay resultados para: {busqueda}")
-
         else:
             st.info("Utilice el buscador superior para localizar el protocolo.")
 
