@@ -111,7 +111,6 @@ try:
                     cat = str(row.get('categoria', '')).lower()
                     emoji = mapa_emojis.get(cat, '⚖️')
 
-                    # Cabecera dinámica (primer elemento de la lista)
                     norma_p = str(row.get('norma', '')).split('/')[0]
                     art_p = str(row.get('art', '')).split('/')[0]
                     
@@ -119,8 +118,15 @@ try:
                         if row.get('palabras_clave'):
                             st.caption(f"🔑 Palabras clave: {row['palabras_clave']}")
 
-                        st.markdown("<div class='seccion-header'>🚨 PROTOCOLO DE ACTUACIÓN / HECHOS</div>", unsafe_allow_html=True)
-                        st.info(row.get('hechos', row.get('diligencias', 'No especificado')))
+                        # CAMBIO SOLICITADO: Hechos seguido del Protocolo
+                        st.markdown("<div class='seccion-header'>🚨 HECHOS Y PROTOCOLO DE ACTUACIÓN</div>", unsafe_allow_html=True)
+                        
+                        texto_hechos = row.get('hechos', 'No especificados')
+                        texto_protocolo = row.get('protocolo', 'No especificado')
+                        
+                        # Combinamos ambos campos en el mismo bloque informativo
+                        contenido_info = f"**HECHOS:**\n{texto_hechos}\n\n---\n**PROTOCOLO:**\n{texto_protocolo}"
+                        st.info(contenido_info)
 
                         col1, col2, col3, col4 = st.columns(4)
 
@@ -135,8 +141,8 @@ try:
 
                         with col2:
                             st.markdown("<div class='seccion-header'>⭐ Puntos</div>", unsafe_allow_html=True)
-                            # Usamos la columna 'cptos' como indicaste
-                            st.markdown(f"<div class='dato-importante'>{formatear_multivalor(row.get('cptos', '0'), ' ptos')}</div>", unsafe_allow_html=True)
+                            # Sincronizado con el nombre de tu columna en el CSV: 'ptos'
+                            st.markdown(f"<div class='dato-importante'>{formatear_multivalor(row.get('ptos', '0'), ' ptos')}</div>", unsafe_allow_html=True)
 
                         with col3:
                             st.markdown("<div class='seccion-header'>⚠️ Calif.</div>", unsafe_allow_html=True)
